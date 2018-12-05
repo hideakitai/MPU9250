@@ -2,7 +2,7 @@
 #include "MPU9250.h"
 
 const uint8_t EEPROM_SIZE = 1 + sizeof(float) * 3 * 4;
-bool isCalibrated = false;
+bool b_calibrated = false;
 extern MPU9250 mpu;
 
 enum EEP_ADDR
