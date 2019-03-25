@@ -80,14 +80,12 @@ public:
             {
                 Serial.print("Could not connect to AK8963: 0x");
                 Serial.println(a_whoami);
-                while(1);
             }
         }
         else
         {
             Serial.print("Could not connect to MPU9250: 0x");
             Serial.println(m_whoami);
-            while(1);
         }
     }
 
