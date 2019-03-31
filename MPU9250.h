@@ -52,7 +52,7 @@ class MPU9250_
 
     QuaternionFilter qFilter;
 
-    float magnetic_declination = 7.51; // Japan, 24th June
+    float magnetic_declination = -7.51; // Japan, 24th June
 
 public:
 
