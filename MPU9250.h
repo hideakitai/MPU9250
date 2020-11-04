@@ -2,11 +2,7 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
-#ifdef TEENSYDUINO
-#include <i2c_t3.h>
-#else
 #include <Wire.h>
-#endif
 
 #include "MPU9250/MPU9250RegisterMap.h"
 #include "MPU9250/QuaternionFilter.h"
@@ -832,10 +828,6 @@ private:
 
 };
 
-#ifdef TEENSYDUINO
-using MPU9250 = MPU9250_<i2c_t3>;
-#else
 using MPU9250 = MPU9250_<TwoWire>;
-#endif
 
 #endif // MPU9250_H
