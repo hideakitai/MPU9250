@@ -58,35 +58,29 @@ public:
 
     MPU9250_() : aRes(getAres()), gRes(getGres()), mRes(getMres()) {}
 
-    void setup(WireType& w = Wire)
+    bool setup(WireType& w = Wire)
     {
         wire = &w;
 
-        uint8_t m_whoami = 0x00;
-        uint8_t a_whoami = 0x00;
-
-        m_whoami = isConnectedMPU9250();
-        if (m_whoami)
+        if (isConnectedMPU9250())
         {
             Serial.println("MPU9250 is online...");
             initMPU9250();
 
-            a_whoami = isConnectedAK8963();
-            if (a_whoami)
-            {
+            if (isConnectedAK8963())
                 initAK8963(magCalibration);
-            }
             else
             {
-                Serial.print("Could not connect to AK8963: 0x");
-                Serial.println(a_whoami);
+                Serial.println("Could not connect to AK8963");
+                return false;
             }
         }
         else
         {
-            Serial.print("Could not connect to MPU9250: 0x");
-            Serial.println(m_whoami);
+            Serial.println("Could not connect to MPU9250");
+            return false;
         }
+        return true;
     }
 
     void calibrateAccelGyro()
