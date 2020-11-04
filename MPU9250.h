@@ -174,16 +174,16 @@ public:
     float getPitch() const { return pitch; }
     float getYaw() const { return yaw; }
 
-    float getQuaternion(uint8_t i) const { return (i < 4) ? q[i] : 0.f; }
+    float getQuaternion(const uint8_t i) const { return (i < 4) ? q[i] : 0.f; }
 
     float getQuaternionX() const { return q[0]; }
     float getQuaternionY() const { return q[1]; }
     float getQuaternionZ() const { return q[2]; }
     float getQuaternionW() const { return q[3]; }
 
-    float getAcc(uint8_t i) const { return (i < 3) ? a[i] : 0.f; }
-    float getGyro(uint8_t i) const { return (i < 3) ? g[i] : 0.f; }
-    float getMag(uint8_t i) const { return (i < 3) ? m[i] : 0.f; }
+    float getAcc(const uint8_t i) const { return (i < 3) ? a[i] : 0.f; }
+    float getGyro(const uint8_t i) const { return (i < 3) ? g[i] : 0.f; }
+    float getMag(const uint8_t i) const { return (i < 3) ? m[i] : 0.f; }
 
     float getAccX() const { return a[0]; }
     float getAccY() const { return a[1]; }
@@ -195,10 +195,10 @@ public:
     float getMagY() const { return m[1]; }
     float getMagZ() const { return m[2]; }
 
-    float getAccBias(uint8_t i) const { return (i < 3) ? accelBias[i] : 0.f; }
-    float getGyroBias(uint8_t i) const { return (i < 3) ? gyroBias[i] : 0.f; }
-    float getMagBias(uint8_t i) const { return (i < 3) ? magBias[i] : 0.f; }
-    float getMagScale(uint8_t i) const { return (i < 3) ? magScale[i] : 0.f; }
+    float getAccBias(const uint8_t i) const { return (i < 3) ? accelBias[i] : 0.f; }
+    float getGyroBias(const uint8_t i) const { return (i < 3) ? gyroBias[i] : 0.f; }
+    float getMagBias(const uint8_t i) const { return (i < 3) ? magBias[i] : 0.f; }
+    float getMagScale(const uint8_t i) const { return (i < 3) ? magScale[i] : 0.f; }
 
     float getAccBiasX() const { return accelBias[0]; }
     float getAccBiasY() const { return accelBias[1]; }
@@ -213,23 +213,23 @@ public:
     float getMagScaleY() const { return magScale[1]; }
     float getMagScaleZ() const { return magScale[2]; }
 
-    void setAccBias(uint8_t i, float v) { if (i < 3) accelBias[i] = v; }
-    void setGyroBias(uint8_t i, float v) { if (i < 3) gyroBias[i] = v; }
-    void setMagBias(uint8_t i, float v) { if (i < 3) magBias[i] = v; }
-    void setMagScale(uint8_t i, float v) { if (i < 3) magScale[i] = v; }
+    void setAccBias(const uint8_t i, const float v) { if (i < 3) accelBias[i] = v; }
+    void setGyroBias(const uint8_t i, const float v) { if (i < 3) gyroBias[i] = v; }
+    void setMagBias(const uint8_t i, const float v) { if (i < 3) magBias[i] = v; }
+    void setMagScale(const uint8_t i, const float v) { if (i < 3) magScale[i] = v; }
 
-    void setAccBiasX(float v) { accelBias[0] = v; }
-    void setAccBiasY(float v) { accelBias[1] = v; }
-    void setAccBiasZ(float v) { accelBias[2] = v; }
-    void setGyroBiasX(float v) { gyroBias[0] = v; }
-    void setGyroBiasY(float v) { gyroBias[1] = v; }
-    void setGyroBiasZ(float v) { gyroBias[2] = v; }
-    void setMagBiasX(float v) { magBias[0] = v; }
-    void setMagBiasY(float v) { magBias[1] = v; }
-    void setMagBiasZ(float v) { magBias[2] = v; }
-    void setMagScaleX(float v) { magScale[0] = v; }
-    void setMagScaleY(float v) { magScale[1] = v; }
-    void setMagScaleZ(float v) { magScale[2] = v; }
+    void setAccBiasX(const float v) { accelBias[0] = v; }
+    void setAccBiasY(const float v) { accelBias[1] = v; }
+    void setAccBiasZ(const float v) { accelBias[2] = v; }
+    void setGyroBiasX(const float v) { gyroBias[0] = v; }
+    void setGyroBiasY(const float v) { gyroBias[1] = v; }
+    void setGyroBiasZ(const float v) { gyroBias[2] = v; }
+    void setMagBiasX(const float v) { magBias[0] = v; }
+    void setMagBiasY(const float v) { magBias[1] = v; }
+    void setMagBiasZ(const float v) { magBias[2] = v; }
+    void setMagScaleX(const float v) { magScale[0] = v; }
+    void setMagScaleY(const float v) { magScale[1] = v; }
+    void setMagScaleZ(const float v) { magScale[2] = v; }
 
     void setMagneticDeclination(const float d) { magnetic_declination = d; }
 
