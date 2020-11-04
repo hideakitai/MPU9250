@@ -11,15 +11,16 @@
 enum class AFS { A2G, A4G, A8G, A16G };
 enum class GFS { G250DPS, G500DPS, G1000DPS, G2000DPS };
 enum class MFS { M14BITS, M16BITS }; // 0.6mG, 0.15mG per LSB
+static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE {0x71};
+static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE {0x73};
 
 
-template <typename WireType, AFS AFSSEL = AFS::A16G, GFS GFSSEL = GFS::G2000DPS, MFS MFSSEL = MFS::M16BITS>
+template <typename WireType, uint8_t WHO_AM_I, AFS AFSSEL = AFS::A16G, GFS GFSSEL = GFS::G2000DPS, MFS MFSSEL = MFS::M16BITS>
 class MPU9250_
 {
     const uint8_t MPU9250_ADDRESS {0x68};  // Device address when ADO = 0
     const uint8_t AK8963_ADDRESS {0x0C};   //  Address of magnetometer
 
-    const uint8_t MPU9250_WHOAMI_DEFAULT_VALUE {0x71}; // 0x68????
     const uint8_t AK8963_WHOAMI_DEFAULT_VALUE {0x48};
 
     // Set initial input parameters
@@ -94,7 +95,7 @@ public:
         byte c = readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
         Serial.print("MPU9250 WHO AM I = ");
         Serial.println(c, HEX);
-        return (c == MPU9250_WHOAMI_DEFAULT_VALUE);
+        return (c == WHO_AM_I);
     }
 
     bool isConnectedAK8963()
@@ -828,6 +829,7 @@ private:
 
 };
 
-using MPU9250 = MPU9250_<TwoWire>;
+using MPU9250 = MPU9250_<TwoWire, MPU9250_WHOAMI_DEFAULT_VALUE>;
+using MPU9255 = MPU9250_<TwoWire, MPU9255_WHOAMI_DEFAULT_VALUE>;
 
 #endif // MPU9250_H
