@@ -125,13 +125,12 @@ public:
         return (readByte(MPU9250_ADDRESS, INT_STATUS) & 0x01);
     }
 
-    void update()
+    bool update()
     {
-        if (available())
-        {  // On interrupt, check if data ready interrupt
-            updateAccelGyro();
-            updateMag(); // TODO: set to 30fps?
-        }
+        if (!available()) return false;
+
+        updateAccelGyro();
+        updateMag();
 
         // Madgwick function needs to be fed North, East, and Down direction like
         // (AN, AE, AD, GN, GE, GD, MN, ME, MD)
@@ -165,6 +164,8 @@ public:
             // For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
             updateRPY();
         }
+
+        return true;
     }
 
 
