@@ -52,6 +52,8 @@ class MPU9250_
 
     float magnetic_declination = -7.51; // Japan, 24th June
 
+    bool b_verbose {false};
+
 public:
 
     MPU9250_() : aRes(getAres()), gRes(getGres()), mRes(getMres()) {}
@@ -63,24 +65,30 @@ public:
 
         if (isConnectedMPU9250())
         {
-            Serial.println("MPU9250 is online...");
+            if (b_verbose)
+                Serial.println("MPU9250 is online...");
+
             initMPU9250();
 
             if (isConnectedAK8963())
                 initAK8963(magCalibration);
             else
             {
-                Serial.println("Could not connect to AK8963");
+                if (b_verbose)
+                    Serial.println("Could not connect to AK8963");
                 return false;
             }
         }
         else
         {
-            Serial.println("Could not connect to MPU9250");
+            if (b_verbose)
+                Serial.println("Could not connect to MPU9250");
             return false;
         }
         return true;
     }
+
+    void verbose(const bool b) { b_verbose = b; }
 
     void calibrateAccelGyro()
     {
@@ -95,16 +103,20 @@ public:
     bool isConnectedMPU9250()
     {
         byte c = readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
-        Serial.print("MPU9250 WHO AM I = ");
-        Serial.println(c, HEX);
+        if (b_verbose) {
+            Serial.print("MPU9250 WHO AM I = ");
+            Serial.println(c, HEX);
+        }
         return (c == WHO_AM_I);
     }
 
     bool isConnectedAK8963()
     {
         byte c = readByte(AK8963_ADDRESS, AK8963_WHO_AM_I);
-        Serial.print("AK8963  WHO AM I = ");
-        Serial.println(c, HEX);
+        if (b_verbose) {
+            Serial.print("AK8963  WHO AM I = ");
+            Serial.println(c, HEX);
+        }
         return (c == AK8963_WHOAMI_DEFAULT_VALUE);
     }
 
@@ -388,13 +400,15 @@ private:
         writeByte(AK8963_ADDRESS, AK8963_CNTL, (uint8_t)MFSSEL << 4 | Mmode); // Set magnetometer data resolution and sample ODR
         delay(10);
 
-        Serial.println("Calibration values: ");
-        Serial.print("X-Axis sensitivity adjustment value "); Serial.println(destination[0], 2);
-        Serial.print("Y-Axis sensitivity adjustment value "); Serial.println(destination[1], 2);
-        Serial.print("Z-Axis sensitivity adjustment value "); Serial.println(destination[2], 2);
-        Serial.print("X-Axis sensitivity offset value "); Serial.println(magBias[0], 2);
-        Serial.print("Y-Axis sensitivity offset value "); Serial.println(magBias[1], 2);
-        Serial.print("Z-Axis sensitivity offset value "); Serial.println(magBias[2], 2);
+        if (b_verbose) {
+            Serial.println("Calibration values: ");
+            Serial.print("X-Axis sensitivity adjustment value "); Serial.println(destination[0], 2);
+            Serial.print("Y-Axis sensitivity adjustment value "); Serial.println(destination[1], 2);
+            Serial.print("Z-Axis sensitivity adjustment value "); Serial.println(destination[2], 2);
+            Serial.print("X-Axis sensitivity offset value "); Serial.println(magBias[0], 2);
+            Serial.print("Y-Axis sensitivity offset value "); Serial.println(magBias[1], 2);
+            Serial.print("Z-Axis sensitivity offset value "); Serial.println(magBias[2], 2);
+        }
     }
 
     void magcalMPU9250(float * dest1, float * dest2)
@@ -403,7 +417,8 @@ private:
         int32_t mag_bias[3] = {0, 0, 0}, mag_scale[3] = {0, 0, 0};
         int16_t mag_max[3] = {-32767, -32767, -32767}, mag_min[3] = {32767, 32767, 32767}, mag_temp[3] = {0, 0, 0};
 
-        Serial.println("Mag Calibration: Wave device in a figure eight until done!");
+        if (b_verbose)
+            Serial.println("Mag Calibration: Wave device in a figure eight until done!");
         delay(4000);
 
         // shoot for ~fifteen seconds of mag data
@@ -422,9 +437,11 @@ private:
             if(Mmode == 0x06) delay(12);  // at 100 Hz ODR, new mag data is available every 10 ms
         }
 
-        Serial.println("mag x min/max:"); Serial.println(mag_max[0]); Serial.println(mag_min[0]);
-        Serial.println("mag y min/max:"); Serial.println(mag_max[1]); Serial.println(mag_min[1]);
-        Serial.println("mag z min/max:"); Serial.println(mag_max[2]); Serial.println(mag_min[2]);
+        if (b_verbose) {
+            Serial.println("mag x min/max:"); Serial.println(mag_max[0]); Serial.println(mag_min[0]);
+            Serial.println("mag y min/max:"); Serial.println(mag_max[1]); Serial.println(mag_min[1]);
+            Serial.println("mag z min/max:"); Serial.println(mag_max[2]); Serial.println(mag_min[2]);
+        }
 
         // Get hard iron correction
         mag_bias[0]  = (mag_max[0] + mag_min[0])/2;  // get average x mag bias in counts
@@ -447,16 +464,18 @@ private:
         dest2[1] = avg_rad/((float)mag_scale[1]);
         dest2[2] = avg_rad/((float)mag_scale[2]);
 
-        Serial.println("Mag Calibration done!");
+        if (b_verbose) {
+            Serial.println("Mag Calibration done!");
 
-        Serial.println("AK8963 mag biases (mG)");
-        Serial.print(magBias[0]); Serial.print(", ");
-        Serial.print(magBias[1]); Serial.print(", ");
-        Serial.print(magBias[2]); Serial.println();
-        Serial.println("AK8963 mag scale (mG)");
-        Serial.print(magScale[0]); Serial.print(", ");
-        Serial.print(magScale[1]); Serial.print(", ");
-        Serial.print(magScale[2]); Serial.println();
+            Serial.println("AK8963 mag biases (mG)");
+            Serial.print(magBias[0]); Serial.print(", ");
+            Serial.print(magBias[1]); Serial.print(", ");
+            Serial.print(magBias[2]); Serial.println();
+            Serial.println("AK8963 mag scale (mG)");
+            Serial.print(magScale[0]); Serial.print(", ");
+            Serial.print(magScale[1]); Serial.print(", ");
+            Serial.print(magScale[2]); Serial.println();
+        }
     }
 
     void initMPU9250()
@@ -666,16 +685,18 @@ private:
         dest2[1] = (float)accel_bias[1] / (float)accelsensitivity;
         dest2[2] = (float)accel_bias[2] / (float)accelsensitivity;
 
-        Serial.println("MPU9250 bias");
-        Serial.println(" x   y   z  ");
-        Serial.print((int)(1000 * accelBias[0])); Serial.print(" ");
-        Serial.print((int)(1000 * accelBias[1])); Serial.print(" ");
-        Serial.print((int)(1000 * accelBias[2])); Serial.print(" ");
-        Serial.println("mg");
-        Serial.print(gyroBias[0], 1); Serial.print(" ");
-        Serial.print(gyroBias[1], 1); Serial.print(" ");
-        Serial.print(gyroBias[2], 1); Serial.print(" ");
-        Serial.println("o/s");
+        if (b_verbose) {
+            Serial.println("MPU9250 bias");
+            Serial.println(" x   y   z  ");
+            Serial.print((int)(1000 * accelBias[0])); Serial.print(" ");
+            Serial.print((int)(1000 * accelBias[1])); Serial.print(" ");
+            Serial.print((int)(1000 * accelBias[2])); Serial.print(" ");
+            Serial.println("mg");
+            Serial.print(gyroBias[0], 1); Serial.print(" ");
+            Serial.print(gyroBias[1], 1); Serial.print(" ");
+            Serial.print(gyroBias[2], 1); Serial.print(" ");
+            Serial.println("o/s");
+        }
 
         delay(100);
 
@@ -769,12 +790,14 @@ private:
             SelfTestResult[i+3] = 100.0 * ((float)(gSTAvg[i] - gAvg[i])) / factoryTrim[i+3] - 100.; // Report percent differences
         }
 
-        Serial.print("x-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[0], 1); Serial.println("% of factory value");
-        Serial.print("y-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[1], 1); Serial.println("% of factory value");
-        Serial.print("z-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[2], 1); Serial.println("% of factory value");
-        Serial.print("x-axis self test: gyration trim within : "); Serial.print(SelfTestResult[3], 1); Serial.println("% of factory value");
-        Serial.print("y-axis self test: gyration trim within : "); Serial.print(SelfTestResult[4], 1); Serial.println("% of factory value");
-        Serial.print("z-axis self test: gyration trim within : "); Serial.print(SelfTestResult[5], 1); Serial.println("% of factory value");
+        if (b_verbose) {
+            Serial.print("x-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[0], 1); Serial.println("% of factory value");
+            Serial.print("y-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[1], 1); Serial.println("% of factory value");
+            Serial.print("z-axis self test: acceleration trim within : "); Serial.print(SelfTestResult[2], 1); Serial.println("% of factory value");
+            Serial.print("x-axis self test: gyration trim within : "); Serial.print(SelfTestResult[3], 1); Serial.println("% of factory value");
+            Serial.print("y-axis self test: gyration trim within : "); Serial.print(SelfTestResult[4], 1); Serial.println("% of factory value");
+            Serial.print("z-axis self test: gyration trim within : "); Serial.print(SelfTestResult[5], 1); Serial.println("% of factory value");
+        }
         delay(5000);
     }
 
