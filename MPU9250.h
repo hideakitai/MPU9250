@@ -10,7 +10,7 @@
 
 enum class AFS { A2G, A4G, A8G, A16G };
 enum class GFS { G250DPS, G500DPS, G1000DPS, G2000DPS };
-enum class MFS { M14BITS, M16BITS }; // 0.6mG, 0.15mG per LSB
+enum class MFS { M14BITS, M16BITS };
 static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE {0x71};
 static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE {0x73};
 
