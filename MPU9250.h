@@ -18,8 +18,9 @@ static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE {0x73};
 template <typename WireType, uint8_t WHO_AM_I, AFS AFSSEL = AFS::A16G, GFS GFSSEL = GFS::G2000DPS, MFS MFSSEL = MFS::M16BITS>
 class MPU9250_
 {
-    const uint8_t MPU9250_ADDRESS {0x68};  // Device address when ADO = 0
-    const uint8_t AK8963_ADDRESS {0x0C};   //  Address of magnetometer
+    static constexpr uint8_t MPU9250_DEFAULT_ADDRESS {0x68};  // Device address when ADO = 0
+    static constexpr uint8_t AK8963_ADDRESS {0x0C};   //  Address of magnetometer
+    uint8_t MPU9250_ADDRESS {MPU9250_DEFAULT_ADDRESS};
 
     const uint8_t AK8963_WHOAMI_DEFAULT_VALUE {0x48};
 
@@ -55,9 +56,10 @@ public:
 
     MPU9250_() : aRes(getAres()), gRes(getGres()), mRes(getMres()) {}
 
-    bool setup(WireType& w = Wire)
+    bool setup(const uint8_t addr = MPU9250_DEFAULT_ADDRESS, WireType& w = Wire)
     {
         wire = &w;
+        MPU9250_ADDRESS = addr;
 
         if (isConnectedMPU9250())
         {
