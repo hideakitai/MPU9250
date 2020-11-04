@@ -11,6 +11,7 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 #include "MPU9250.h"
 
 MPU9250 mpu;
+// MPU9255 mpu; // You can also use MPU9255
 
 void setup()
 {
@@ -62,6 +63,7 @@ void setup()
 
     delay(2000);
     mpu.setup();
+    // mpu.setup(0x70); // you can set your own address
 
     delay(5000);
 
