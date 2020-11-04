@@ -10,7 +10,7 @@ void setup()
     Wire.begin();
 
     delay(2000);
-    mpu.setup(Wire);
+    mpu.setup();
 
     delay(5000);
 
