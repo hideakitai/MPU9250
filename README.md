@@ -7,7 +7,7 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 
 ### Simple Measurement
 
-```
+``` C++
 #include "MPU9250.h"
 
 MPU9250 mpu;
@@ -20,6 +20,7 @@ void setup()
 
     delay(2000);
     mpu.setup();
+    // mpu.setup(0x70); // you can set your own address
 }
 
 void loop()
@@ -47,10 +48,11 @@ void loop()
 - device should be stay still during accel/gyro calibration
 - round device around during mag calibration
 
-```
+``` C++
 #include "MPU9250.h"
 
 MPU9250 mpu;
+// MPU9255 mpu; // You can also use MPU9255
 
 void setup()
 {
@@ -75,9 +77,17 @@ void loop()
 }
 ```
 
-### 
 
 ## Other Settings
+
+### I2C Address
+
+You can set your own address based on A0, A1, A2 setting as:
+
+``` C++
+mpu.setup(0x70); // you can set your own address
+```
+
 
 ### Magnetic Declination
 
@@ -105,7 +115,7 @@ For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination)
 
 #### MFS
 
-`enum class MFS { M14BITS, M16BITS }; // 0.6mG, 0.15mG per LSB`
+`enum class MFS { M14BITS, M16BITS };
 
 #### How to change
 
@@ -113,9 +123,9 @@ MPU9250 class is defined as follows.
 
 ```C++
 template <
-	typename WireType, 
-	AFS AFSSEL = AFS::A16G, 
-	GFS GFSSEL = GFS::G2000DPS, 
+	typename WireType,
+	AFS AFSSEL = AFS::A16G,
+	GFS GFSSEL = GFS::G2000DPS,
 	MFS MFSSEL = MFS::M16BITS
 >
 class MPU9250_;
@@ -128,6 +138,94 @@ class MPU9250_<TwoWire, AFS::A4G, GFS::G500DPS, MFS::M14BITS> mpu; // most of Ar
 class MPU9250_<i2c_t3, AFS::A4G, GFS::G500DPS, MFS::M14BITS> mpu; // Teensy
 ```
 
+### MPU9255
+
+To use MPU9255 instead of MPU9250, just declare MPU9255.
+
+```C++
+MPU9255 mpu;
+```
+
+## APIs
+
+``` C++
+bool setup(const uint8_t addr = MPU9250_DEFAULT_ADDRESS, WireType& w = Wire);
+void verbose(const bool b);
+void calibrateAccelGyro();
+void calibrateMag();
+bool isConnectedMPU9250();
+bool isConnectedAK8963();
+bool available();
+bool update();
+
+float getRoll() const;
+float getPitch() const;
+float getYaw() const;
+
+float getQuaternion(uint8_t i) const;
+
+float getQuaternionX() const;
+float getQuaternionY() const;
+float getQuaternionZ() const;
+float getQuaternionW() const;
+
+float getAcc(const uint8_t i) const;
+float getGyro(const uint8_t i) const;
+float getMag(const uint8_t i) const;
+
+float getAccX() const;
+float getAccY() const;
+float getAccZ() const;
+float getGyroX() const;
+float getGyroY() const;
+float getGyroZ() const;
+float getMagX() const;
+float getMagY() const;
+float getMagZ() const;
+
+float getAccBias(const uint8_t i) const;
+float getGyroBias(const uint8_t i) const;
+float getMagBias(const uint8_t i) const;
+float getMagScale(const uint8_t i) const;
+
+float getAccBiasX() const;
+float getAccBiasY() const;
+float getAccBiasZ() const;
+float getGyroBiasX() const;
+float getGyroBiasY() const;
+float getGyroBiasZ() const;
+float getMagBiasX() const;
+float getMagBiasY() const;
+float getMagBiasZ() const;
+float getMagScaleX() const;
+float getMagScaleY() const;
+float getMagScaleZ() const;
+
+void setAccBias(const uint8_t i, const float v);
+void setGyroBias(const uint8_t i, const float v);
+void setMagBias(const uint8_t i, const float v);
+void setMagScale(const uint8_t i, const float v);
+
+void setAccBiasX(const float v);
+void setAccBiasY(const float v);
+void setAccBiasZ(const float v);
+void setGyroBiasX(const float v);
+void setGyroBiasY(const float v);
+void setGyroBiasZ(const float v);
+void setMagBiasX(const float v);
+void setMagBiasY(const float v);
+void setMagBiasZ(const float v);
+void setMagScaleX(const float v);
+void setMagScaleY(const float v);
+void setMagScaleZ(const float v);
+
+void setMagneticDeclination(const float d);
+
+void print() const;
+void printRawData() const;
+void printRollPitchYaw() const;
+void printCalibration() const;
+```
 
 ## License
 
