@@ -168,8 +168,6 @@ public:
     }
 
 
-    void setI2CAddress(uint8_t addr) {} // TODO:
-
     // TODO: more efficient getter, const refrerence of struct??
     float getRoll() const { return roll; }
     float getPitch() const { return pitch; }
