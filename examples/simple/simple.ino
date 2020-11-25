@@ -2,32 +2,19 @@
 
 MPU9250 mpu;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
-
     Wire.begin();
 
     delay(2000);
     mpu.setup();
 }
 
-void loop()
-{
+void loop() {
     static uint32_t prev_ms = millis();
-    if ((millis() - prev_ms) > 16)
-    {
+    if ((millis() - prev_ms) > 16) {
         mpu.update();
-        mpu.print();
-
-        Serial.print("roll  (x-forward (north)) : ");
-        Serial.println(mpu.getRoll());
-        Serial.print("pitch (y-right (east))    : ");
-        Serial.println(mpu.getPitch());
-        Serial.print("yaw   (z-down (down))     : ");
-        Serial.println(mpu.getYaw());
-
+        mpu.printRollPitchYaw();
         prev_ms = millis();
     }
 }
-
