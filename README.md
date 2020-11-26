@@ -13,31 +13,19 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 MPU9250 mpu;
 // MPU9255 mpu; // You can also use MPU9255
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
-
     Wire.begin();
-
     delay(2000);
-    mpu.setup();
-    // mpu.setup(0x70); // you can set your own address
+
+    mpu.setup(0x68);  // change to your own address
 }
 
-void loop()
-{
+void loop() {
     static uint32_t prev_ms = millis();
-    if ((millis() - prev_ms) > 16)
-    {
+    if ((millis() - prev_ms) > 16) {
         mpu.update();
-        mpu.print();
-
-        Serial.print("roll  (x-forward (north)) : ");
-        Serial.println(mpu.getRoll());
-        Serial.print("pitch (y-right (east))    : ");
-        Serial.println(mpu.getPitch());
-        Serial.print("yaw   (z-down (down))     : ");
-        Serial.println(mpu.getYaw());
+        mpu.printRollPitchYaw();
 
         prev_ms = millis();
     }
@@ -55,15 +43,12 @@ void loop()
 MPU9250 mpu;
 // MPU9255 mpu; // You can also use MPU9255
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
-
     Wire.begin();
-
     delay(2000);
-    mpu.setup();
-    // mpu.setup(0x70); // you can set your own address
+
+    mpu.setup(0x68);  // change to your own address
 
     delay(5000);
 
@@ -74,9 +59,7 @@ void setup()
     mpu.printCalibration();
 }
 
-void loop()
-{
-}
+void loop() { }
 ```
 
 
@@ -84,12 +67,23 @@ void loop()
 
 ### I2C Address
 
-You can set your own address based on A0, A1, A2 setting as:
+You must set your own address based on A0, A1, A2 setting as:
 
 ``` C++
-mpu.setup(0x70); // you can set your own address
+mpu.setup(0x70);
 ```
 
+### Other I2C library
+
+You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
+
+``` C++
+MPU9250_<SoftWire, MPU9250_WHOAMI_DEFAULT_VALUE> mpu;
+SoftWire sw(SDA, SCL);
+
+// in setup()
+mpu.setup(0x70, sw);
+```
 
 ### Magnetic Declination
 
