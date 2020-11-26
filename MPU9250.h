@@ -61,7 +61,15 @@ class MPU9250_ {
 public:
     MPU9250_() : aRes(getAres()), gRes(getGres()), mRes(getMres()) {}
 
-    bool setup(const uint8_t addr = MPU9250_DEFAULT_ADDRESS, WireType& w = Wire) {
+    bool setup(const uint8_t addr, WireType& w = Wire) {
+        // addr should be valid for MPU
+        if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7)) {
+            Serial.print("I2C address 0x");
+            Serial.print(addr, HEX);
+            Serial.println(" is not valid for MPU. Please check your I2C address.");
+            return false;
+        }
+
         wire = &w;
         MPU9250_ADDRESS = addr;
 
