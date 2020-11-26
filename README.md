@@ -145,7 +145,7 @@ MPU9255 mpu;
 ## APIs
 
 ``` C++
-bool setup(const uint8_t addr = MPU9250_DEFAULT_ADDRESS, WireType& w = Wire);
+bool setup(const uint8_t addr, WireType& w = Wire);
 void verbose(const bool b);
 void calibrateAccelGyro();
 void calibrateMag();
