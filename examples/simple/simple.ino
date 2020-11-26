@@ -11,10 +11,7 @@ void setup() {
 }
 
 void loop() {
-    static uint32_t prev_ms = millis();
-    if ((millis() - prev_ms) > 16) {
-        mpu.update();
+    if (mpu.update()) {
         mpu.printRollPitchYaw();
-        prev_ms = millis();
     }
 }
