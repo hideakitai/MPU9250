@@ -193,6 +193,8 @@ float getMagScaleX() const;
 float getMagScaleY() const;
 float getMagScaleZ() const;
 
+float getTemperature() const;
+
 void setAccBias(const uint8_t i, const float v);
 void setGyroBias(const uint8_t i, const float v);
 void setMagBias(const uint8_t i, const float v);

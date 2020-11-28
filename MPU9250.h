@@ -209,6 +209,8 @@ public:
     float getMagScaleY() const { return magScale[1]; }
     float getMagScaleZ() const { return magScale[2]; }
 
+    float getTemperature() const { return temperature; }
+
     void setAccBias(const uint8_t i, const float v) {
         if (i < 3) accelBias[i] = v;
     }
@@ -373,6 +375,9 @@ private:
         a[0] = (float)MPU9250Data[0] * aRes - accelBias[0];  // get actual g value, this depends on scale being set
         a[1] = (float)MPU9250Data[1] * aRes - accelBias[1];
         a[2] = (float)MPU9250Data[2] * aRes - accelBias[2];
+
+        tempCount = MPU9250Data[3];                        // Read the adc values
+        temperature = ((float)tempCount) / 333.87 + 21.0;  // Temperature in degrees Centigrade
 
         // Calculate the gyro value into actual degrees per second
         g[0] = (float)MPU9250Data[4] * gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
