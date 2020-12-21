@@ -156,6 +156,14 @@ You can find magnetic declination in your city [here](http://www.magnetic-declin
 
 For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination).
 
+#### Filter Type
+
+```C++
+mpu.setFilter(value)
+```
+value = true is Madgwick
+value = false is Mahony
+
 
 
 ### Other I2C library
