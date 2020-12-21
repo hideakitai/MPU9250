@@ -215,6 +215,8 @@ void setMagScaleZ(const float v);
 
 void setMagneticDeclination(const float d);
 
+bool selftest();
+
 void print() const;
 void printRawData() const;
 void printRollPitchYaw() const;

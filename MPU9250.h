@@ -799,7 +799,7 @@ private:
     }
 
     // Accelerometer and gyroscope self test; check calibration wrt factory settings
-    void SelfTest()  // Should return percent deviation from factory trim values, +/- 14 or less deviation is a pass
+    bool selftest()  // Should return percent deviation from factory trim values, +/- 14 or less deviation is a pass
     {
         uint8_t rawData[6] = {0, 0, 0, 0, 0, 0};
         uint8_t selfTest[6];
@@ -902,7 +902,12 @@ private:
             Serial.print(SelfTestResult[5], 1);
             Serial.println("% of factory value");
         }
-        delay(5000);
+
+        bool b = true;
+        for (uint8_t i = 0; i < 6; ++i) {
+            b &= fabs(SelfTestResult[i]) <= 14.f;
+        }
+        return b;
     }
 
     void writeByte(uint8_t address, uint8_t subAddress, uint8_t data) {
