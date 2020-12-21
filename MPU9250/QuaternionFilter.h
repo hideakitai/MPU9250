@@ -18,13 +18,22 @@ class QuaternionFilter
 
     // for mahony only
     float eInt[3] = {0.0f, 0.0f, 0.0f};       // vector to hold integral error for Mahony method
+	bool isMadgwick=true;
 
 public:
-
+	// Inititially set update to MadgwickQuaternionUpdate
+	void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q)
+	{
+		if(isMadgwick)
+			updateMadgwick(ax, ay, az, gx, gy, gz, mx, my, mz, q);
+		else
+			MahonyQuaternionUpdate(ax, ay, az, gx, gy, gz, mx, my, mz, q);
+	}
+    
     void bind() {}
 
     // MadgwickQuaternionUpdate
-    void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q)
+    void updateMadgwick(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q)
     {
         // updateParams()
         float q1 = q[0], q2 = q[1], q3 = q[2], q4 = q[3];   // short name local variable for readability
@@ -217,6 +226,10 @@ public:
         q[3] = q4 * norm;
     }
 
+	void setFilter(bool setMadgwick)
+	{
+		isMadgwick=setMadgwick;
+	}
 
 };
 
