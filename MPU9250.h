@@ -7,20 +7,64 @@
 #include "MPU9250/MPU9250RegisterMap.h"
 #include "MPU9250/QuaternionFilter.h"
 
-enum class AFS { A2G,
+enum class ACCEL_FS_SEL { A2G,
                  A4G,
                  A8G,
                  A16G };
-enum class GFS { G250DPS,
+enum class GYRO_FS_SEL { G250DPS,
                  G500DPS,
                  G1000DPS,
                  G2000DPS };
-enum class MFS { M14BITS,
+enum class MAG_OUTPUT_BITS { M14BITS,
                  M16BITS };
 static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE{0x71};
 static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE{0x73};
 
-template <typename WireType, uint8_t WHO_AM_I, AFS AFSSEL = AFS::A16G, GFS GFSSEL = GFS::G2000DPS, MFS MFSSEL = MFS::M16BITS>
+enum class FIFO_SAMPLE_RATE : uint8_t {
+    SMPL_1000HZ,
+    SMPL_500HZ,
+    SMPL_333HZ,
+    SMPL_250HZ,
+    SMPL_200HZ,
+    SMPL_167HZ,
+    SMPL_143HZ,
+    SMPL_125HZ,
+};
+
+enum class GYRO_DLPF_CFG : uint8_t {
+    DLPF_250HZ,
+    DLPF_184HZ,
+    DLPF_92HZ,
+    DLPF_41HZ,
+    DLPF_20HZ,
+    DLPF_10HZ,
+    DLPF_5HZ,
+    DLPF_3600HZ,
+};
+
+enum class ACCEL_DLPF_CFG : uint8_t {
+    DLPF_218HZ_0,
+    DLPF_218HZ_1,
+    DLPF_99HZ,
+    DLPF_45HZ,
+    DLPF_21HZ,
+    DLPF_10HZ,
+    DLPF_5HZ,
+    DLPF_420HZ,
+};
+
+struct MPU9250Setting {
+    ACCEL_FS_SEL     accel_fs_sel {ACCEL_FS_SEL::A16G};
+    GYRO_FS_SEL      gyro_fs_sel {GYRO_FS_SEL::G2000DPS};
+    MAG_OUTPUT_BITS  mag_output_bits {MAG_OUTPUT_BITS::M16BITS};
+    FIFO_SAMPLE_RATE fifo_sample_rate {FIFO_SAMPLE_RATE::SMPL_200HZ};
+    uint8_t          gyro_fchoice {0x03};
+    GYRO_DLPF_CFG    gyro_dlpf_cfg {GYRO_DLPF_CFG::DLPF_41HZ};
+    uint8_t          accel_fchoice {0x01};
+    ACCEL_DLPF_CFG   accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
+};
+
+template <typename WireType, uint8_t WHO_AM_I>
 class MPU9250_ {
     static constexpr uint8_t MPU9250_DEFAULT_ADDRESS{0x68};  // Device address when ADO = 0
     static constexpr uint8_t AK8963_ADDRESS{0x0C};           //  Address of magnetometer
@@ -31,9 +75,9 @@ class MPU9250_ {
     // Set initial input parameters
     // const uint8_t Mmode {0x02};        // 2 for 8 Hz, 6 for 100 Hz continuous magnetometer data read
     const uint8_t Mmode{0x06};    // 2 for 8 Hz, 6 for 100 Hz continuous magnetometer data read
-    const float aRes{getAres()};  // scale resolutions per LSB for the sensors
-    const float gRes{getGres()};  // scale resolutions per LSB for the sensors
-    const float mRes{getMres()};  // scale resolutions per LSB for the sensors
+    float aRes;  // scale resolutions per LSB for the sensors
+    float gRes;  // scale resolutions per LSB for the sensors
+    float mRes;  // scale resolutions per LSB for the sensors
 
     float magCalibration[3] = {0, 0, 0};  // factory mag calibration
     float magBias[3] = {0, 0, 0};
@@ -56,12 +100,13 @@ class MPU9250_ {
 
     float magnetic_declination = -7.51;  // Japan, 24th June
 
+    MPU9250Setting setting;
+
     bool b_verbose{false};
 
 public:
-    MPU9250_() : aRes(getAres()), gRes(getGres()), mRes(getMres()) {}
 
-    bool setup(const uint8_t addr, WireType& w = Wire) {
+    bool setup(const uint8_t addr, const MPU9250Setting& mpu_setting = MPU9250Setting(), WireType& w = Wire) {
         // addr should be valid for MPU
         if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7)) {
             Serial.print("I2C address 0x");
@@ -69,6 +114,8 @@ public:
             Serial.println(" is not valid for MPU. Please check your I2C address.");
             return false;
         }
+
+        setting = mpu_setting;
 
         wire = &w;
         MPU9250_ADDRESS = addr;
@@ -323,47 +370,53 @@ public:
     }
 
 private:
-    float getAres() const {
-        switch (AFSSEL) {
+    float getAres(const ACCEL_FS_SEL accel_af_sel) const {
+        switch (accel_af_sel) {
             // Possible accelerometer scales (and their register bit settings) are:
             // 2 Gs (00), 4 Gs (01), 8 Gs (10), and 16 Gs  (11).
             // Here's a bit of an algorith to calculate DPS/(ADC tick) based on that 2-bit value:
-            case AFS::A2G:
+            case ACCEL_FS_SEL::A2G:
                 return 2.0 / 32768.0;
-            case AFS::A4G:
+            case ACCEL_FS_SEL::A4G:
                 return 4.0 / 32768.0;
-            case AFS::A8G:
+            case ACCEL_FS_SEL::A8G:
                 return 8.0 / 32768.0;
-            case AFS::A16G:
+            case ACCEL_FS_SEL::A16G:
                 return 16.0 / 32768.0;
+            default:
+                return 0.;
         }
     }
 
-    float getGres() const {
-        switch (GFSSEL) {
+    float getGres(const GYRO_FS_SEL gyro_fs_sel) const {
+        switch (gyro_fs_sel) {
             // Possible gyro scales (and their register bit settings) are:
             // 250 DPS (00), 500 DPS (01), 1000 DPS (10), and 2000 DPS  (11).
             // Here's a bit of an algorith to calculate DPS/(ADC tick) based on that 2-bit value:
-            case GFS::G250DPS:
+            case GYRO_FS_SEL::G250DPS:
                 return 250.0 / 32768.0;
-            case GFS::G500DPS:
+            case GYRO_FS_SEL::G500DPS:
                 return 500.0 / 32768.0;
-            case GFS::G1000DPS:
+            case GYRO_FS_SEL::G1000DPS:
                 return 1000.0 / 32768.0;
-            case GFS::G2000DPS:
+            case GYRO_FS_SEL::G2000DPS:
                 return 2000.0 / 32768.0;
+            default:
+                return 0.;
         }
     }
 
-    float getMres() const {
-        switch (MFSSEL) {
+    float getMres(const MAG_OUTPUT_BITS mag_output_bits) const {
+        switch (mag_output_bits) {
             // Possible magnetometer scales (and their register bit settings) are:
             // 14 bit resolution (0) and 16 bit resolution (1)
             // Proper scale to return milliGauss
-            case MFS::M14BITS:
+            case MAG_OUTPUT_BITS::M14BITS:
                 return 10. * 4912. / 8190.0;
-            case MFS::M16BITS:
+            case MAG_OUTPUT_BITS::M16BITS:
                 return 10. * 4912. / 32760.0;
+            default:
+                return 0.;
         }
     }
 
@@ -467,7 +520,7 @@ private:
         // Configure the magnetometer for continuous read and highest resolution
         // set Mscale bit 4 to 1 (0) to enable 16 (14) bit resolution in CNTL register,
         // and enable continuous mode data acquisition Mmode (bits [3:0]), 0010 for 8 Hz and 0110 for 100 Hz sample rates
-        writeByte(AK8963_ADDRESS, AK8963_CNTL, (uint8_t)MFSSEL << 4 | Mmode);  // Set magnetometer data resolution and sample ODR
+        writeByte(AK8963_ADDRESS, AK8963_CNTL, (uint8_t)setting.mag_output_bits << 4 | Mmode);  // Set magnetometer data resolution and sample ODR
         delay(10);
 
         if (b_verbose) {
@@ -566,6 +619,10 @@ private:
     }
 
     void initMPU9250() {
+        aRes = getAres(setting.accel_fs_sel);
+        gRes = getGres(setting.gyro_fs_sel);
+        mRes = getMres(setting.mag_output_bits);
+
         // wake up device
         writeByte(MPU9250_ADDRESS, PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
         delay(100);                                    // Wait for all registers to reset
@@ -578,37 +635,40 @@ private:
         // Disable FSYNC and set thermometer and gyro bandwidth to 41 and 42 Hz, respectively;
         // minimum delay time for this setting is 5.9 ms, which means sensor fusion update rates cannot
         // be higher than 1 / 0.0059 = 170 Hz
-        // DLPF_CFG = bits 2:0 = 011; this limits the sample rate to 1000 Hz for both
+        // GYRO_DLPF_CFG = bits 2:0 = 011; this limits the sample rate to 1000 Hz for both
         // With the MPU9250, it is possible to get gyro sample rates of 32 kHz (!), 8 kHz, or 1 kHz
-        writeByte(MPU9250_ADDRESS, MPU_CONFIG, 0x03);
+        uint8_t mpu_config = (uint8_t)setting.gyro_dlpf_cfg;
+        writeByte(MPU9250_ADDRESS, MPU_CONFIG, mpu_config);
 
         // Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
-        writeByte(MPU9250_ADDRESS, SMPLRT_DIV, 0x04);  // Use a 200 Hz rate; a rate consistent with the filter update rate
-                                                       // determined inset in CONFIG above
+        uint8_t sample_rate = (uint8_t)setting.fifo_sample_rate;
+        writeByte(MPU9250_ADDRESS, SMPLRT_DIV, sample_rate);  // Use a 200 Hz rate; a rate consistent with the filter update rate
+                                                              // determined inset in CONFIG above
 
         // Set gyroscope full scale range
         // Range selects FS_SEL and GFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
         uint8_t c = readByte(MPU9250_ADDRESS, GYRO_CONFIG);  // get current GYRO_CONFIG register value
-        // c = c & ~0xE0; // Clear self-test bits [7:5]
-        c = c & ~0x03;                 // Clear Fchoice bits [1:0]
-        c = c & ~0x18;                 // Clear GFS bits [4:3]
-        c = c | (uint8_t)GFSSEL << 3;  // Set full scale range for the gyro
-        // c =| 0x00; // Set Fchoice for the gyro to 11 by writing its inverse to bits 1:0 of GYRO_CONFIG
-        writeByte(MPU9250_ADDRESS, GYRO_CONFIG, c);  // Write new GYRO_CONFIG value to register
+        c = c & ~0xE0;                                  // Clear self-test bits [7:5]
+        c = c & ~0x03;                                  // Clear Fchoice bits [1:0]
+        c = c & ~0x18;                                  // Clear GYRO_FS_SEL bits [4:3]
+        c = c | (uint8_t(setting.gyro_fs_sel) << 3);    // Set full scale range for the gyro
+        c = c | (uint8_t(setting.gyro_fchoice) & 0x03); // Set Fchoice for the gyro
+        writeByte(MPU9250_ADDRESS, GYRO_CONFIG, c);     // Write new GYRO_CONFIG value to register
 
         // Set accelerometer full-scale range configuration
-        c = readByte(MPU9250_ADDRESS, ACCEL_CONFIG);  // get current ACCEL_CONFIG register value
-        // c = c & ~0xE0; // Clear self-test bits [7:5]
-        c = c & ~0x18;                                // Clear AFS bits [4:3]
-        c = c | (uint8_t)AFSSEL << 3;                 // Set full scale range for the accelerometer
-        writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c);  // Write new ACCEL_CONFIG register value
+        c = readByte(MPU9250_ADDRESS, ACCEL_CONFIG); // get current ACCEL_CONFIG register value
+        c = c & ~0xE0;                               // Clear self-test bits [7:5]
+        c = c & ~0x18;                               // Clear ACCEL_FS_SEL bits [4:3]
+        c = c | (uint8_t(setting.accel_fs_sel) << 3);  // Set full scale range for the accelerometer
+        writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c); // Write new ACCEL_CONFIG register value
 
         // Set accelerometer sample rate configuration
         // It is possible to get a 4 kHz sample rate from the accelerometer by choosing 1 for
         // accel_fchoice_b bit [3]; in this case the bandwidth is 1.13 kHz
         c = readByte(MPU9250_ADDRESS, ACCEL_CONFIG2);  // get current ACCEL_CONFIG2 register value
         c = c & ~0x0F;                                 // Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
-        c = c | 0x03;                                  // Set accelerometer rate to 1 kHz and bandwidth to 41 Hz
+        c = c | ((uint8_t(setting.accel_fchoice) & 0x01) << 3); // Set accel_fchoice_b to 1
+        c = c | uint8_t(setting.accel_dlpf_cfg);       // Set accelerometer rate to 1 kHz and bandwidth to 41 Hz
         writeByte(MPU9250_ADDRESS, ACCEL_CONFIG2, c);  // Write new ACCEL_CONFIG2 register value
 
         // The accelerometer, gyro, and thermometer are set to 1 kHz sample rates,
