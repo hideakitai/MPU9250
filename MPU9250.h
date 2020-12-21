@@ -1008,7 +1008,13 @@ private:
         Serial.print("I2C ERROR CODE : ");
         Serial.println(i2c_err_);
     }
-
+	
+    // set quaternion filter to Madgwick (true) or Mahony (false)
+    void setFilter(bool setMadgwick)
+    {
+       qFilter.setFilter(setMadgwick);
+    }
+	
     bool b_ahrs{true};
 
     WireType* wire;
