@@ -69,19 +69,81 @@ You must set your own address based on A0, A1, A2 setting as:
 mpu.setup(0x70);
 ```
 
-### Other I2C library
 
-You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
+### Customize MPU9250 Configuration
+
+You can set your own setting using `MPU9250Setting` struct as:
 
 ``` C++
-MPU9250_<SoftWire, MPU9250_WHOAMI_DEFAULT_VALUE> mpu;
-SoftWire sw(SDA, SCL);
+MPU9250Setting setting;
+setting.accel_fs_sel = ACCEL_FS_SEL::A16G;
+setting.gyro_fs_sel = GYRO_FS_SEL::G2000DPS;
+setting.mag_output_bits = MAG_OUTPUT_BITS::M16BITS;
+setting.fifo_sample_rate = FIFO_SAMPLE_RATE::SMPL_200HZ;
+setting.gyro_fchoice = 0x03;
+setting.gyro_dlpf_cfg = GYRO_DLPF_CFG::DLPF_41HZ;
+setting.accel_fchoice = 0x01;
+setting.accel_dlpf_cfg = ACCEL_DLPF_CFG::DLPF_45HZ;
 
-// in setup()
-mpu.setup(0x70, sw);
+mpu.setup(0x68, setting);
 ```
 
-### Magnetic Declination
+See `custom_setting.ino` example for detail.
+
+
+#### List of Settings
+
+```C++
+enum class ACCEL_FS_SEL { A2G, A4G, A8G, A16G };
+enum class GYRO_FS_SEL { G250DPS, G500DPS, G1000DPS, G2000DPS };
+enum class MAG_OUTPUT_BITS { M14BITS, M16BITS };
+
+enum class FIFO_SAMPLE_RATE : uint8_t {
+    SMPL_1000HZ,
+    SMPL_500HZ,
+    SMPL_333HZ,
+    SMPL_250HZ,
+    SMPL_200HZ,
+    SMPL_167HZ,
+    SMPL_143HZ,
+    SMPL_125HZ,
+};
+
+enum class GYRO_DLPF_CFG : uint8_t {
+    DLPF_250HZ,
+    DLPF_184HZ,
+    DLPF_92HZ,
+    DLPF_41HZ,
+    DLPF_20HZ,
+    DLPF_10HZ,
+    DLPF_5HZ,
+    DLPF_3600HZ,
+};
+
+enum class ACCEL_DLPF_CFG : uint8_t {
+    DLPF_218HZ_0,
+    DLPF_218HZ_1,
+    DLPF_99HZ,
+    DLPF_45HZ,
+    DLPF_21HZ,
+    DLPF_10HZ,
+    DLPF_5HZ,
+    DLPF_420HZ,
+};
+
+struct MPU9250Setting {
+    ACCEL_FS_SEL     accel_fs_sel {ACCEL_FS_SEL::A16G};
+    GYRO_FS_SEL      gyro_fs_sel {GYRO_FS_SEL::G2000DPS};
+    MAG_OUTPUT_BITS  mag_output_bits {MAG_OUTPUT_BITS::M16BITS};
+    FIFO_SAMPLE_RATE fifo_sample_rate {FIFO_SAMPLE_RATE::SMPL_200HZ};
+    uint8_t          gyro_fchoice {0x03};
+    GYRO_DLPF_CFG    gyro_dlpf_cfg {GYRO_DLPF_CFG::DLPF_41HZ};
+    uint8_t          accel_fchoice {0x01};
+    ACCEL_DLPF_CFG   accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
+};
+```
+
+#### Magnetic Declination
 
 Magnetic declination should be set depending on where you are to get accurate data.
 To set it, use this method.
@@ -95,39 +157,20 @@ You can find magnetic declination in your city [here](http://www.magnetic-declin
 For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination).
 
 
-### AFS, FGS, MFS
 
-#### AFS
+### Other I2C library
 
-`enum class AFS { A2G, A4G, A8G, A16G };`
+You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
 
-#### GFS
+``` C++
+MPU9250_<SoftWire, MPU9250_WHOAMI_DEFAULT_VALUE> mpu;
+SoftWire sw(SDA, SCL);
 
-`enum class GFS { G250DPS, G500DPS, G1000DPS, G2000DPS };`
+// you need setting struct
+MPU9250Setting setting;
 
-#### MFS
-
-`enum class MFS { M14BITS, M16BITS };
-
-#### How to change
-
-MPU9250 class is defined as follows.
-
-```C++
-template <
-	typename WireType,
-	AFS AFSSEL = AFS::A16G,
-	GFS GFSSEL = GFS::G2000DPS,
-	MFS MFSSEL = MFS::M16BITS
->
-class MPU9250_;
-```
-
-So, please use like
-
-```
-class MPU9250_<TwoWire, AFS::A4G, GFS::G500DPS, MFS::M14BITS> mpu; // most of Arduino
-class MPU9250_<i2c_t3, AFS::A4G, GFS::G500DPS, MFS::M14BITS> mpu; // Teensy
+// in setup()
+mpu.setup(0x70, setting, sw);
 ```
 
 ### MPU9255
@@ -141,7 +184,7 @@ MPU9255 mpu;
 ## APIs
 
 ``` C++
-bool setup(const uint8_t addr, WireType& w = Wire);
+bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
 void verbose(const bool b);
 void calibrateAccelGyro();
 void calibrateMag();
