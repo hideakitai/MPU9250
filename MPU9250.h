@@ -424,18 +424,20 @@ private:
         int16_t MPU9250Data[7];        // used to read all 14 bytes at once from the MPU9250 accel/gyro
         readMPU9250Data(MPU9250Data);  // INT cleared on any read
 
-        // Now we'll calculate the accleration value into actual g's
-        a[0] = (float)MPU9250Data[0] * aRes - accelBias[0];  // get actual g value, this depends on scale being set
-        a[1] = (float)MPU9250Data[1] * aRes - accelBias[1];
-        a[2] = (float)MPU9250Data[2] * aRes - accelBias[2];
+        // Now we'll calculate the accleration value into actual g's. 
+		    a[0] = ((float)MPU9250Data[0] - accelBias[0]) * aRes ;  // get actual g value, this depends on scale being set
+        a[1] = ((float)MPU9250Data[1] - accelBias[1]) * aRes ;
+        a[2] = ((float)MPU9250Data[2] - accelBias[2]) * aRes ;
 
         tempCount = MPU9250Data[3];                        // Read the adc values
         temperature = ((float)tempCount) / 333.87 + 21.0;  // Temperature in degrees Centigrade
 
         // Calculate the gyro value into actual degrees per second
-        g[0] = (float)MPU9250Data[4] * gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
-        g[1] = (float)MPU9250Data[5] * gRes - gyroBias[1];
-        g[2] = (float)MPU9250Data[6] * gRes - gyroBias[2];
+		    // Bias was written to device so why substract gyroBias[0] ??
+		    g[0] = ((float)MPU9250Data[4] - gyroBias[0])* gRes;  // get actual gyro value, this depends on scale being set
+        g[1] = ((float)MPU9250Data[5] - gyroBias[1])* gRes;
+        g[2] = ((float)MPU9250Data[6] - gyroBias[2])* gRes;
+
     }
 
     void readMPU9250Data(int16_t* destination) {
