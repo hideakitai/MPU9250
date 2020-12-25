@@ -30,6 +30,8 @@ void loop() {
 
 ### Calibration
 
+- accel/gyro/mag offsets are **NOT stored** to register if the MPU has powered off ([app note](https://www.digikey.com/en/pdf/i/invensense/mpu-hardware-offset-registers))
+- need to **set all offsets at every bootup by yourself** (or calibrate at every bootup)
 - device should be stay still during accel/gyro calibration
 - round device around during mag calibration
 
@@ -188,6 +190,7 @@ bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire
 void verbose(const bool b);
 void calibrateAccelGyro();
 void calibrateMag();
+bool isConnected();
 bool isConnectedMPU9250();
 bool isConnectedAK8963();
 bool available();
@@ -198,7 +201,6 @@ float getPitch() const;
 float getYaw() const;
 
 float getQuaternion(uint8_t i) const;
-
 float getQuaternionX() const;
 float getQuaternionY() const;
 float getQuaternionZ() const;
@@ -238,30 +240,20 @@ float getMagScaleZ() const;
 
 float getTemperature() const;
 
-void setAccBias(const uint8_t i, const float v);
-void setGyroBias(const uint8_t i, const float v);
-void setMagBias(const uint8_t i, const float v);
-void setMagScale(const uint8_t i, const float v);
-
-void setAccBiasX(const float v);
-void setAccBiasY(const float v);
-void setAccBiasZ(const float v);
-void setGyroBiasX(const float v);
-void setGyroBiasY(const float v);
-void setGyroBiasZ(const float v);
-void setMagBiasX(const float v);
-void setMagBiasY(const float v);
-void setMagBiasZ(const float v);
-void setMagScaleX(const float v);
-void setMagScaleY(const float v);
-void setMagScaleZ(const float v);
-
+void setAccBias(const float x, const float y, const float z);
+void setGyroBias(const float x, const float y, const float z);
+void setMagBias(const float x, const float y, const float z);
+void setMagScale(const float x, const float y, const float z);
 void setMagneticDeclination(const float d);
 
 bool selftest();
 
 void print() const;
 void printRawData() const;
+void printAcc() const;
+void printGyro() const;
+void printMag() const;
+void printQuaternion() const;
 void printRollPitchYaw() const;
 void printCalibration() const;
 ```
