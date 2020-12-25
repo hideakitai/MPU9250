@@ -199,8 +199,8 @@ public:
         // get quaternion based on aircraft coordinate (Right-Hand, X-Forward, Z-Down)
         // acc[mg], gyro[deg/s], mag [mG]
         // gyro will be convert from [deg/s] to [rad/s] inside of this function
-        // quat_filter.update(-a[0], a[1], a[2], g[0], -g[1], -g[2], m[1], -m[0], m[2], q);
-        quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
+        // quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
+        quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q);
 
         if (!b_ahrs) {
             temperature_count = read_temperature_data();               // Read the adc values
