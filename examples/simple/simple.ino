@@ -18,7 +18,7 @@ void setup() {
 void loop() {
     if (mpu.update()) {
         static uint32_t prev_ms = millis();
-        if (millis() > prev_ms + 50) {
+        if (millis() > prev_ms + 25) {
             mpu.printRollPitchYaw();
             prev_ms = millis();
         }
