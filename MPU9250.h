@@ -508,6 +508,10 @@ private:
         roll *= 180.0f / PI;
         yaw *= 180.0f / PI;
         yaw += magnetic_declination;
+        if (yaw >= +180.f)
+            yaw -= 360.f;
+        else if (yaw < -180.f)
+            yaw += 360.f;
     }
 
     void update_accel_gyro() {
