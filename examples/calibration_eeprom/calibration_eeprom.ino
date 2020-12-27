@@ -21,10 +21,19 @@ void setup() {
 
     delay(5000);
 
-    // calibrate when you want to
+    // calibrate anytime you want to
+    Serial.println("Accel Gyro calibration will start in 5sec.");
+    Serial.println("Please leave the device still on the flat plane.");
     mpu.verbose(true);
+    delay(5000);
     mpu.calibrateAccelGyro();
+
+    Serial.println("Mag calibration will start in 5sec.");
+    Serial.println("Please Wave device in a figure eight until done.");
+    delay(5000);
     mpu.calibrateMag();
+
+    mpu.printCalibration();
     mpu.verbose(false);
 
     // save to eeprom
@@ -32,8 +41,6 @@ void setup() {
 
     // load from eeprom
     loadCalibration();
-
-    mpu.printCalibration();
 }
 
 void loop() {
