@@ -104,6 +104,7 @@ class MPU9250_ {
 
     // Other settings
     bool b_ahrs{true};
+    bool b_raw_rpy_dir{false};
     bool b_verbose{false};
 
     // I2C
@@ -145,6 +146,14 @@ public:
 
     void verbose(const bool b) {
         b_verbose = b;
+    }
+
+    void ahrs(const bool b) {
+        b_ahrs = b;
+    }
+
+    void useRawPitchYawRollDirection(const bool b) {
+        b_raw_rpy_dir = b;
     }
 
     void calibrateAccelGyro() {
@@ -200,7 +209,11 @@ public:
         // acc[mg], gyro[deg/s], mag [mG]
         // gyro will be convert from [deg/s] to [rad/s] inside of this function
         // quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
-        quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q);
+        // @hideakitai changed for new Madgwick filter calculation, please note that axes has changed from before
+        if (b_raw_rpy_dir)
+            quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q);
+        else
+            quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
 
         if (!b_ahrs) {
             temperature_count = read_temperature_data();               // Read the adc values
