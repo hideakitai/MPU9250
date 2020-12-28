@@ -499,24 +499,15 @@ private:
         // Tait-Bryan angles as well as Euler angles are non-commutative; that is, the get the correct orientation the rotations must be
         // applied in the correct order which for this configuration is yaw, pitch, and then roll.
         // For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
-        // @hideakitai: replaced by https://github.com/openframeworks/openFrameworks/blob/fe591d17e95218569cc2426d1d8f4f646f75fa00/libs/openFrameworks/math/ofQuaternion.cpp#L276
-        float test = q[1] * q[2] + q[3] * q[0];
-        if (test > 0.499) {  // singularity at north pole
-            yaw = 2 * atan2(q[1], q[0]);
-            pitch = PI / 2;
-            roll = 0;
-        } else if (test < -0.499) {  // singularity at south pole
-            yaw = -2 * atan2(q[1], q[0]);
-            pitch = -PI / 2;
-            roll = 0;
-        } else {
-            float sqx = q[1] * q[1];
-            float sqy = q[2] * q[2];
-            float sqz = q[3] * q[3];
-            yaw = atan2(2.0f * q[2] * q[0] - 2.0f * q[1] * q[3], 1.0f - 2.0f * sqy - 2.0f * sqz);
-            pitch = asin(2 * test);
-            roll = atan2(2.0f * q[1] * q[0] - 2.0f * q[2] * q[3], 1.0f - 2.0f * sqx - 2.0f * sqz);
-        }
+        float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
+        a12 = 2.0f * (q[1] * q[2] + q[0] * q[3]);
+        a22 = q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3];
+        a31 = 2.0f * (q[0] * q[1] + q[2] * q[3]);
+        a32 = 2.0f * (q[1] * q[3] - q[0] * q[2]);
+        a33 = q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3];
+        pitch = -asinf(a32);
+        roll = atan2f(a31, a33);
+        yaw = atan2f(a12, a22);
         pitch *= 180.0f / PI;
         roll *= 180.0f / PI;
         yaw *= 180.0f / PI;
