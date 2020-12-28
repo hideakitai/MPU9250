@@ -32,15 +32,11 @@ public:
 	
 	void getRPY(float *yaw,float *pitch, float *roll)
 	{
-		float test = q[0] * q[2] + q[3] * q[1];
-		
-        float sqw = q[0] * q[0];
-		float sqx = q[1] * q[1];
-		float sqy = q[2] * q[2];
-		float sqz = q[3] * q[3];
-		*yaw = atan2(2.0f * q[1] * q[2] - 2.0f * q[0] * q[3], 2.0f * sqw + 2.0f * sqx - 1)*180.0f / PI;
-		*pitch = -asin(2 * test)*180.0f / PI;
-		*roll = atan2(2.0f * q[2] * q[3] - 2.0f * q[0] * q[1], 2.0f * sqw + 2.0f * sqz - 1)*180.0f / PI;
+		*yaw = atan2(2.0f * q[1] * q[2] - 2.0f * q[0] * q[3], 
+					2.0f *  q[0] * q[0] + 2.0f * q[1] * q[1] - 1)*180.0f / PI;
+		*pitch = -asin(2 * (q[0] * q[2] + q[3] * q[1]))*180.0f / PI;
+		*roll = atan2(2.0f * q[2] * q[3] - 2.0f * q[0] * q[1], 
+					2.0f *  q[0] * q[0] + 2.0f * q[3] * q[3] - 1)*180.0f / PI;
 	}
 #endif
 // Madgwick 1
