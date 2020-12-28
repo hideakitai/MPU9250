@@ -188,6 +188,8 @@ MPU9255 mpu;
 ``` C++
 bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
 void verbose(const bool b);
+void ahrs(const bool b);
+void useRawPitchYawRollDirection(const bool b);
 void calibrateAccelGyro();
 void calibrateMag();
 bool isConnected();
