@@ -2,6 +2,8 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
+#define GRAVITY_EARTH (9.80665f)
+
 #include <Wire.h>
 
 #include "MPU9250/MPU9250RegisterMap.h"
@@ -98,13 +100,12 @@ class MPU9250_ {
     float a[3], g[3], m[3];
     float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};  // vector to hold quaternion
     float pitch, yaw, roll;
-    float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
     float lin_ax, lin_ay, lin_az;   // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
 
     // Other settings
     bool b_ahrs{true};
-    bool b_raw_rpy_dir{false};
+    bool b_raw_rpy_dir{true};
     bool b_verbose{false};
 
     // I2C
@@ -296,6 +297,17 @@ public:
         return self_test_impl();
     }
 
+    
+    void printLinAccel() const {
+        // Print acceleration values in milligs!
+        Serial.print("lax = ");
+        Serial.print(lin_ax);
+        Serial.print(" lay = ");
+        Serial.print(lin_ay);
+        Serial.print(" laz = ");
+        Serial.println(lin_az);
+    }
+    
     void print() const {
         printRawData();
         printRollPitchYaw();
@@ -392,6 +404,8 @@ public:
         Serial.print(mag_scale[2]);
         Serial.println();
     }
+    
+    
 
 private:
     void initMPU9250() {
@@ -490,6 +504,10 @@ private:
     }
 
     void update_rpy() {
+//        Mia Dec28 2020
+//        gravity compensation added
+        
+        
         // Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
         // In this coordinate system, the positive z-axis is down toward Earth.
         // Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination, looking down on the sensor positive yaw is counterclockwise.
@@ -499,23 +517,43 @@ private:
         // Tait-Bryan angles as well as Euler angles are non-commutative; that is, the get the correct orientation the rotations must be
         // applied in the correct order which for this configuration is yaw, pitch, and then roll.
         // For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
-        float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
-        a12 = 2.0f * (q[1] * q[2] + q[0] * q[3]);
-        a22 = q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3];
-        a31 = 2.0f * (q[0] * q[1] + q[2] * q[3]);
-        a32 = 2.0f * (q[1] * q[3] - q[0] * q[2]);
-        a33 = q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3];
-        pitch = -asinf(a32);
-        roll = atan2f(a31, a33);
-        yaw = atan2f(a12, a22);
+        
+        float a11, a12, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
+        a11 = 1 - 2.0f * (q[2] * q[2] + q[3] * q[3]);
+        a12 = 2.0f * (q[1] * q[2] - q[0] * q[3]);
+        
+        a31 = 2.0f * (q[1] * q[3] - q[2] * q[0]);
+        a32 = 2.0f * (q[2] * q[3] + q[1] * q[0]);
+//        Normalised
+        a33 = 1 - 2.0f * (q[1] * q[1] + q[2] * q[2]);
+        
+        roll = atan2f(a32, a33);
+        pitch = -asinf(a31);
+        yaw = atan2f(-a12, a11);
+        
         pitch *= 180.0f / PI;
         roll *= 180.0f / PI;
         yaw *= 180.0f / PI;
-        yaw += magnetic_declination;
-        if (yaw >= +180.f)
-            yaw -= 360.f;
-        else if (yaw < -180.f)
+        
+        if (yaw < 0)
             yaw += 360.f;
+        
+//        gravity components -> a31,a32,a33
+        g[0] = a31;
+        g[1] = a32;
+        g[2] = a33;
+        
+//        Serial.print("gx = ");
+//        Serial.print(g[0]);
+//        Serial.print(" gy = ");
+//        Serial.print(g[1]);
+//        Serial.print(" gz = ");
+//        Serial.println(g[2]);
+        
+        lin_ax = a[0] - g[0];
+        lin_ay = a[1] - g[1];
+        lin_az = a[2] - g[2];
+        
     }
 
     void update_accel_gyro() {
@@ -590,7 +628,7 @@ private:
         collect_acc_gyro_data_to(acc_bias, gyro_bias);
         write_accel_offset();
         write_gyro_offset();
-        printCalibration();
+        //printCalibration();
         delay(100);
         initMPU9250();
         delay(1000);
