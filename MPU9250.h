@@ -110,6 +110,9 @@ class MPU9250_ {
     // I2C
     WireType* wire;
     uint8_t i2c_err_;
+    // TIMING
+    double deltaT = 0.;
+    uint32_t newTime = 0, oldTime = 0;
 
 public:
     static constexpr uint16_t CALIB_GYRO_SENSITIVITY = 131;     // = 131 LSB/degrees/sec
@@ -190,11 +193,21 @@ public:
         return (read_byte(MPU9250_ADDRESS, INT_STATUS) & 0x01);
     }
 
+    void start() {  // needed at the end of startup in order to prevent a large deltaT in first call to quaternion update
+        oldTime=newTime=micros();
+    }
+
     bool update() {
         if (!available()) return false;
 
         update_accel_gyro();
         update_mag();
+        
+        // moved from quaternion in order to be able to start timing properly by using start()
+        newTime = micros();
+        deltaT = newTime - oldTime;
+        oldTime = newTime;
+        deltaT = fabs(deltaT * 0.001 * 0.001);
 
         // Madgwick function needs to be fed North, East, and Down direction like
         // (AN, AE, AD, GN, GE, GD, MN, ME, MD)
@@ -211,9 +224,9 @@ public:
         // quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
         // @hideakitai changed for new Madgwick filter calculation, please note that axes has changed from before
         if (b_raw_rpy_dir)
-            quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q);
+            quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q, deltaT);
         else
-            quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
+            quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q, deltaT);
 
         if (!b_ahrs) {
             temperature_count = read_temperature_data();               // Read the adc values
