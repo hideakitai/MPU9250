@@ -312,72 +312,122 @@ public:
     bool selftest() {
         return self_test_impl();
     }
-
-    void print() const {
-        printRawData();
-        printRollPitchYaw();
-        printCalibration();
+    
+    void printHead(bool p_a=true,
+			bool p_g=true,
+			bool p_m=true, 
+			bool p_q=true,
+			bool p_rpy=true, 
+			bool p_cal=true
+			)  {
+        printRawDataHead(p_a,p_g,p_m,p_q);
+        if(p_rpy) printRollPitchYawHead();
     }
 
-    void printRawData() const {
-        printAcc();
-        printGyro();
-        printMag();
-        printQuaternion();
+    void print(bool p_a=true,
+			bool p_g=true,
+			bool p_m=true, 
+			bool p_q=true,
+			bool p_rpy=true, 
+			bool p_cal=true
+			) const {
+        printRawData(p_a,p_g,p_m,p_q);
+        if(p_rpy) printRollPitchYaw();
+        if(p_cal) printCalibration();
     }
 
+    void printRawDataHead(bool p_a=true,
+			bool p_g=true,
+			bool p_m=true, 
+			bool p_q=true)  {
+        if(p_a) printAccHead();
+        if(p_g) printGyroHead();
+        if(p_m) printMagHead();
+        if(p_q) printQuaternionHead();
+    }
+
+    void printRawData(bool p_a=true,
+			bool p_g=true,
+			bool p_m=true, 
+			bool p_q=true) const {
+        if(p_a) printAcc();
+        if(p_g) printGyro();
+        if(p_m) printMag();
+        if(p_q) printQuaternion();
+    }
+
+    void printAccHead() const {
+        // Print acceleration values in milligs!
+        Serial.print("\tax\tay\taz_mg");
+    }
+	
     void printAcc() const {
         // Print acceleration values in milligs!
-        Serial.print("ax = ");
+        Serial.print("\t");
         Serial.print((int)1000 * a[0]);
-        Serial.print(" ay = ");
+        Serial.print("\t");
         Serial.print((int)1000 * a[1]);
-        Serial.print(" az = ");
+        Serial.print("\t");
         Serial.print((int)1000 * a[2]);
-        Serial.println(" mg");
+
     }
+
+    void printGyroHead() const {
+        // Print gyro values in degree/sec
+        Serial.print("\tgx\tgy\tgz_deg/s");
+    }
+	
     void printGyro() const {
         // Print gyro values in degree/sec
-        Serial.print("gx = ");
+        Serial.print("\t");
         Serial.print(g[0], 2);
-        Serial.print(" gy = ");
+        Serial.print("\t");
         Serial.print(g[1], 2);
-        Serial.print(" gz = ");
+        Serial.print("\t");
         Serial.print(g[2], 2);
-        Serial.println(" deg/s");
     }
 
+    void printMagHead() const {
+        // Print mag values in degree/sec
+        Serial.print("\tmx\tmy\tmz_mG");
+    }
     void printMag() const {
         // Print mag values in degree/sec
-        Serial.print("mx = ");
+        Serial.print("\t");
         Serial.print((int)m[0]);
-        Serial.print(" my = ");
+        Serial.print("\t");
         Serial.print((int)m[1]);
-        Serial.print(" mz = ");
+        Serial.print("\t");
         Serial.print((int)m[2]);
-        Serial.println(" mG");
     }
 
-    void printQuaternion() const {
-        Serial.print("q0 = ");
+    void printQuaternionHead() const {
+       Serial.print("\tq0\tqx\tqy\tqz");
+    }
+	
+	void printQuaternion() const {
+		Serial.print("\t");
         Serial.print(q[0]);
-        Serial.print(" qx = ");
+        Serial.print("\t");
         Serial.print(q[1]);
-        Serial.print(" qy = ");
+        Serial.print("\t");
         Serial.print(q[2]);
-        Serial.print(" qz = ");
-        Serial.println(q[3]);
+        Serial.print("\t");
+        Serial.print(q[3]);
+    }
+
+    void printRollPitchYawHead() const {
+        Serial.print("\tYaw\tPitch\tRoll");
     }
 
     void printRollPitchYaw() const {
-        Serial.print("Yaw, Pitch, Roll: ");
+        Serial.print("\t");
         Serial.print(yaw, 2);
-        Serial.print(", ");
+        Serial.print("\t");
         Serial.print(pitch, 2);
-        Serial.print(", ");
-        Serial.println(roll, 2);
+        Serial.print("\t");
+        Serial.print(roll, 2);
     }
-
     void printCalibration() const {
         Serial.println("< calibration parameters >");
         Serial.println("accel bias [g]: ");
