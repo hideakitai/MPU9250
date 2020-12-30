@@ -99,6 +99,7 @@ class MPU9250_ {
     // IMU Data
     float a[3], g[3], m[3];
     float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};  // vector to hold quaternion
+    float a11, a12, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
     float pitch, yaw, roll;
     float lin_ax, lin_ay, lin_az;   // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
