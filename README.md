@@ -1,6 +1,8 @@
 # MPU9250
 Arduino library for [MPU9250](https://www.invensense.com/products/motion-tracking/9-axis/mpu-9250/) Nine-Axis (Gyro + Accelerometer + Compass) MEMS MotionTracking™ Device
 
+Forked from [Hideaki Tai's library](https://github.com/hideakitai/MPU9250).
+
 This library is based on the [great work](https://github.com/kriswiner/MPU9250) by [kriswiner](https://github.com/kriswiner), and re-writen for the simple usage.
 
 ## Usage
@@ -251,6 +253,7 @@ void setMagneticDeclination(const float d);
 bool selftest();
 
 void print() const;
+void printLinAccel() const;
 void printRawData() const;
 void printAcc() const;
 void printGyro() const;
