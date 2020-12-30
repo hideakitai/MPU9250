@@ -211,6 +211,7 @@ float getQuaternionW() const;
 float getAcc(const uint8_t i) const;
 float getGyro(const uint8_t i) const;
 float getMag(const uint8_t i) const;
+float getLinearAcc(const uint8_t i) const;
 
 float getAccX() const;
 float getAccY() const;
@@ -221,6 +222,9 @@ float getGyroZ() const;
 float getMagX() const;
 float getMagY() const;
 float getMagZ() const;
+float getLinearAccX() const;
+float getLinearAccY() const;
+float getLinearAccZ() const;
 
 float getAccBias(const uint8_t i) const;
 float getGyroBias(const uint8_t i) const;
