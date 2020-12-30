@@ -12,10 +12,8 @@ public:
     void bind() {}
 
     // MadgwickQuaternionUpdate
-    void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q) {
+    void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q, float deltaT) {
         double q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];  // short name local variable for readability
-        static double deltaT = 0.;
-        static uint32_t newTime = 0, oldTime = 0;
         double recipNorm;
         double s0, s1, s2, s3;
         double qDot1, qDot2, qDot3, qDot4;
@@ -92,10 +90,6 @@ public:
         qDot4 -= beta * s3;
 
         // Integrate rate of change of quaternion to yield quaternion
-        newTime = micros();
-        deltaT = newTime - oldTime;
-        oldTime = newTime;
-        deltaT = fabs(deltaT * 0.001 * 0.001);
         q0 += qDot1 * deltaT;
         q1 += qDot2 * deltaT;
         q2 += qDot3 * deltaT;
