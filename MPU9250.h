@@ -99,7 +99,7 @@ class MPU9250_ {
     float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};  // vector to hold quaternion
     float pitch, yaw, roll;
     float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
-    float lin_ax, lin_ay, lin_az;   // linear acceleration (acceleration with gravity component subtracted)
+    float lin_acc[3];               // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
 
     // Other settings
@@ -237,6 +237,7 @@ public:
     float getAcc(const uint8_t i) const { return (i < 3) ? a[i] : 0.f; }
     float getGyro(const uint8_t i) const { return (i < 3) ? g[i] : 0.f; }
     float getMag(const uint8_t i) const { return (i < 3) ? m[i] : 0.f; }
+    float getLinearAcc(const uint8_t i) const { return (i < 3) ? lin_acc[i] : 0.f; }
 
     float getAccX() const { return a[0]; }
     float getAccY() const { return a[1]; }
@@ -247,6 +248,9 @@ public:
     float getMagX() const { return m[0]; }
     float getMagY() const { return m[1]; }
     float getMagZ() const { return m[2]; }
+    float getLinearAccX() const { return lin_acc[0]; }
+    float getLinearAccY() const { return lin_acc[1]; }
+    float getLinearAccZ() const { return lin_acc[2]; }
 
     float getAccBias(const uint8_t i) const { return (i < 3) ? acc_bias[i] : 0.f; }
     float getGyroBias(const uint8_t i) const { return (i < 3) ? gyro_bias[i] : 0.f; }
@@ -516,6 +520,10 @@ private:
             yaw -= 360.f;
         else if (yaw < -180.f)
             yaw += 360.f;
+
+        lin_acc[0] = a[0] + a31;
+        lin_acc[1] = a[1] + a32;
+        lin_acc[2] = a[2] - a33;
     }
 
     void update_accel_gyro() {
