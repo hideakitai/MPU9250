@@ -8,14 +8,15 @@ class QuaternionFilter {
     float beta = sqrt(3.0f / 4.0f) * GyroMeasError;  // compute beta
     float zeta = sqrt(3.0f / 4.0f) * GyroMeasDrift;  // compute zeta, the other free parameter in the Madgwick scheme usually set to a small or zero value
 
+    double deltaT{0.};
+    uint32_t newTime{0}, oldTime{0};
+
 public:
     void bind() {}
 
     // MadgwickQuaternionUpdate
     void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q) {
         double q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];  // short name local variable for readability
-        static double deltaT = 0.;
-        static uint32_t newTime = 0, oldTime = 0;
         double recipNorm;
         double s0, s1, s2, s3;
         double qDot1, qDot2, qDot3, qDot4;
