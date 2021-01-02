@@ -19,8 +19,17 @@ void loop() {
     if (mpu.update()) {
         static uint32_t prev_ms = millis();
         if (millis() > prev_ms + 25) {
-            mpu.printRollPitchYaw();
+            print_roll_pitch_yaw();
             prev_ms = millis();
         }
     }
+}
+
+void print_roll_pitch_yaw() {
+    Serial.print("Yaw, Pitch, Roll: ");
+    Serial.print(mpu.getYaw(), 2);
+    Serial.print(", ");
+    Serial.print(mpu.getPitch(), 2);
+    Serial.print(", ");
+    Serial.println(mpu.getRoll(), 2);
 }

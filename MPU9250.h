@@ -501,7 +501,6 @@ private:
         collect_acc_gyro_data_to(acc_bias, gyro_bias);
         write_accel_offset();
         write_gyro_offset();
-        printCalibration();
         delay(100);
         initMPU9250();
         delay(1000);

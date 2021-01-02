@@ -17,8 +17,8 @@ void setup() {
     setting.accel_fchoice = 0x01;
     setting.accel_dlpf_cfg = ACCEL_DLPF_CFG::DLPF_45HZ;
 
-    if (!mpu.setup(0x68, setting)) { // change to your own address
-        while(1) {
+    if (!mpu.setup(0x68, setting)) {  // change to your own address
+        while (1) {
             Serial.println("MPU connection failed. Please check your connection with `connection_check` example.");
             delay(5000);
         }
@@ -27,6 +27,15 @@ void setup() {
 
 void loop() {
     if (mpu.update()) {
-        mpu.printRollPitchYaw();
+        print_roll_pitch_yaw();
     }
+}
+
+void print_roll_pitch_yaw() {
+    Serial.print("Yaw, Pitch, Roll: ");
+    Serial.print(mpu.getYaw(), 2);
+    Serial.print(", ");
+    Serial.print(mpu.getPitch(), 2);
+    Serial.print(", ");
+    Serial.println(mpu.getRoll(), 2);
 }
