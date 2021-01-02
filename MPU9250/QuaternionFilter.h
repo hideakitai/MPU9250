@@ -12,8 +12,6 @@ class QuaternionFilter {
     uint32_t newTime{0}, oldTime{0};
 
 public:
-    void bind() {}
-
     // MadgwickQuaternionUpdate
     void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float* q) {
         double q0 = q[0], q1 = q[1], q2 = q[2], q3 = q[3];  // short name local variable for readability
