@@ -20,11 +20,11 @@ struct Quat {
     float z;
     float w;
 } quat;
-struct Rpy {
-    float r;
-    float p;
+struct Euler {
+    float x;
     float y;
-} rpy;
+    float z;
+} euler;
 
 void setup() {
     Serial.begin(115200);
@@ -64,7 +64,7 @@ void setup() {
     mpu.verbose(false);
 
     OscWiFi.publish(host, publish_port, "/quat", quat.x, quat.y, quat.z, quat.w);
-    OscWiFi.publish(host, publish_port, "/rpy", rpy.r, rpy.p, rpy.y);
+    OscWiFi.publish(host, publish_port, "/euler", euler.x, euler.y, euler.z);
 }
 
 void loop() {
@@ -78,9 +78,9 @@ void loop() {
         quat.y = mpu.getQuaternionY();
         quat.z = mpu.getQuaternionZ();
         quat.w = mpu.getQuaternionW();
-        rpy.r = mpu.getRoll();
-        rpy.p = mpu.getPitch();
-        rpy.y = mpu.getYaw();
+        euler.x = mpu.getEulerX();
+        euler.y = mpu.getEulerY();
+        euler.z = mpu.getEulerZ();
     }
     OscWiFi.update();
 }
