@@ -97,14 +97,12 @@ class MPU9250_ {
     // IMU Data
     float a[3], g[3], m[3];
     float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};  // vector to hold quaternion
-    float pitch, yaw, roll;
-    float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
-    float lin_acc[3];               // linear acceleration (acceleration with gravity component subtracted)
+    float euler[3] = {0.f};
+    float lin_acc[3];  // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
 
     // Other settings
     bool b_ahrs{true};
-    bool b_raw_rpy_dir{false};
     bool b_verbose{false};
 
     // I2C
@@ -150,10 +148,6 @@ public:
 
     void ahrs(const bool b) {
         b_ahrs = b;
-    }
-
-    void useRawPitchYawRollDirection(const bool b) {
-        b_raw_rpy_dir = b;
     }
 
     void calibrateAccelGyro() {
@@ -210,29 +204,39 @@ public:
         // gyro will be convert from [deg/s] to [rad/s] inside of this function
         // quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
         // @hideakitai changed for new Madgwick filter calculation, please note that axes has changed from before
-        if (b_raw_rpy_dir)
-            quat_filter.update(a[0], a[1], a[2], g[0] * DEG_TO_RAD, g[1] * DEG_TO_RAD, g[2] * DEG_TO_RAD, m[0], m[1], m[2], q);
-        else
-            quat_filter.update(-a[0], a[1], a[2], g[0] * DEG_TO_RAD, -g[1] * DEG_TO_RAD, -g[2] * DEG_TO_RAD, m[1], -m[0], m[2], q);
+
+        float an = +a[0];
+        float ae = -a[1];
+        float ad = -a[2];
+        float gn = +g[0] * DEG_TO_RAD;
+        float ge = -g[1] * DEG_TO_RAD;
+        float gd = -g[2] * DEG_TO_RAD;
+        float mn = +m[1];
+        float me = -m[0];
+        float md = +m[2];
+        quat_filter.update(an, ae, ad, gn, ge, gd, mn, me, md, q);
 
         if (!b_ahrs) {
             temperature_count = read_temperature_data();               // Read the adc values
             temperature = ((float)temperature_count) / 333.87 + 21.0;  // Temperature in degrees Centigrade
         } else {
-            update_rpy();
+            update_euler(q[0], q[1], q[2], q[3]);
         }
         return true;
     }
 
-    float getRoll() const { return roll; }
-    float getPitch() const { return pitch; }
-    float getYaw() const { return yaw; }
+    float getRoll() const { return euler[0]; }
+    float getPitch() const { return -euler[1]; }
+    float getYaw() const { return -euler[2]; }
 
-    float getQuaternion(const uint8_t i) const { return (i < 4) ? q[i] : 0.f; }
-    float getQuaternionX() const { return q[0]; }
-    float getQuaternionY() const { return q[1]; }
-    float getQuaternionZ() const { return q[2]; }
-    float getQuaternionW() const { return q[3]; }
+    float getEulerX() const { return euler[0]; }
+    float getEulerY() const { return euler[1]; }
+    float getEulerZ() const { return euler[2]; }
+
+    float getQuaternionX() const { return q[1]; }
+    float getQuaternionY() const { return q[2]; }
+    float getQuaternionZ() const { return q[3]; }
+    float getQuaternionW() const { return q[0]; }
 
     float getAcc(const uint8_t i) const { return (i < 3) ? a[i] : 0.f; }
     float getGyro(const uint8_t i) const { return (i < 3) ? g[i] : 0.f; }
@@ -396,7 +400,7 @@ private:
         }
     }
 
-    void update_rpy() {
+    void update_euler(float qw, float qx, float qy, float qz) {
         // Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
         // In this coordinate system, the positive z-axis is down toward Earth.
         // Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination, looking down on the sensor positive yaw is counterclockwise.
@@ -407,22 +411,22 @@ private:
         // applied in the correct order which for this configuration is yaw, pitch, and then roll.
         // For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
         float a12, a22, a31, a32, a33;  // rotation matrix coefficients for Euler angles and gravity components
-        a12 = 2.0f * (q[1] * q[2] + q[0] * q[3]);
-        a22 = q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3];
-        a31 = 2.0f * (q[0] * q[1] + q[2] * q[3]);
-        a32 = 2.0f * (q[1] * q[3] - q[0] * q[2]);
-        a33 = q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3];
-        pitch = -asinf(a32);
-        roll = atan2f(a31, a33);
-        yaw = atan2f(a12, a22);
-        pitch *= 180.0f / PI;
-        roll *= 180.0f / PI;
-        yaw *= 180.0f / PI;
-        yaw += magnetic_declination;
-        if (yaw >= +180.f)
-            yaw -= 360.f;
-        else if (yaw < -180.f)
-            yaw += 360.f;
+        a12 = 2.0f * (qx * qy + qw * qz);
+        a22 = qw * qw + qx * qx - qy * qy - qz * qz;
+        a31 = 2.0f * (qw * qx + qy * qz);
+        a32 = 2.0f * (qx * qz - qw * qy);
+        a33 = qw * qw - qx * qx - qy * qy + qz * qz;
+        euler[0] = atan2f(a31, a33);
+        euler[1] = -asinf(a32);
+        euler[2] = atan2f(a12, a22);
+        euler[0] *= 180.0f / PI;
+        euler[1] *= 180.0f / PI;
+        euler[2] *= 180.0f / PI;
+        euler[2] += magnetic_declination;
+        if (euler[2] >= +180.f)
+            euler[2] -= 360.f;
+        else if (euler[2] < -180.f)
+            euler[2] += 360.f;
 
         lin_acc[0] = a[0] + a31;
         lin_acc[1] = a[1] + a32;
