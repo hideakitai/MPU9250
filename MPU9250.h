@@ -300,6 +300,10 @@ public:
     }
     void setMagneticDeclination(const float d) { magnetic_declination = d; }
 
+    void selectFilter(QuatFilterSel sel) {
+        quat_filter.select_filter(sel);
+    }
+
     bool selftest() {
         return self_test_impl();
     }
