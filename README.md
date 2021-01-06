@@ -163,6 +163,18 @@ You can find magnetic declination in your city [here](http://www.magnetic-declin
 For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination).
 
 
+### Quaternion Filter
+
+You can choose quaternion filter using `void selectFilter(QuatFilterSel sel)`. Available quaternion filters are listed below.
+
+```C++
+enum class QuatFilterSel {
+    NONE,
+    MADGWICK, // default
+    MAHONY,
+};
+```
+
 
 ### Other I2C library
 
@@ -258,6 +270,7 @@ void setMagBias(const float x, const float y, const float z);
 void setMagScale(const float x, const float y, const float z);
 void setMagneticDeclination(const float d);
 
+void selectFilter(QuatFilterSel sel);
 bool selftest();
 ```
 
