@@ -10,8 +10,7 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 ``` C++
 #include "MPU9250.h"
 
-MPU9250 mpu;
-// MPU9255 mpu; // You can also use MPU9255
+MPU9250 mpu; // You can also use MPU9255 as is
 
 void setup() {
     Serial.begin(115200);
@@ -40,8 +39,7 @@ void loop() {
 ``` C++
 #include "MPU9250.h"
 
-MPU9250 mpu;
-// MPU9255 mpu; // You can also use MPU9255
+MPU9250 mpu; // You can also use MPU9255 as is
 
 void setup() {
     Serial.begin(115200);
@@ -189,14 +187,6 @@ MPU9250Setting setting;
 
 // in setup()
 mpu.setup(0x70, setting, sw);
-```
-
-### MPU9255
-
-To use MPU9255 instead of MPU9250, just declare MPU9255.
-
-```C++
-MPU9255 mpu;
 ```
 
 ## APIs

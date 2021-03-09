@@ -65,7 +65,7 @@ struct MPU9250Setting {
     ACCEL_DLPF_CFG accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
 };
 
-template <typename WireType, uint8_t WHO_AM_I>
+template <typename WireType>
 class MPU9250_ {
     static constexpr uint8_t MPU9250_DEFAULT_ADDRESS {0x68};  // Device address when ADO = 0
     static constexpr uint8_t AK8963_ADDRESS {0x0C};           //  Address of magnetometer
@@ -175,7 +175,7 @@ public:
             Serial.print("MPU9250 WHO AM I = ");
             Serial.println(c, HEX);
         }
-        return (c == WHO_AM_I);
+        return (c == MPU9250_WHOAMI_DEFAULT_VALUE) || (c == MPU9255_WHOAMI_DEFAULT_VALUE);
     }
 
     bool isConnectedAK8963() {
@@ -951,7 +951,6 @@ private:
     }
 };
 
-using MPU9250 = MPU9250_<TwoWire, MPU9250_WHOAMI_DEFAULT_VALUE>;
-using MPU9255 = MPU9250_<TwoWire, MPU9255_WHOAMI_DEFAULT_VALUE>;
+using MPU9250 = MPU9250_<TwoWire>;
 
 #endif  // MPU9250_H
