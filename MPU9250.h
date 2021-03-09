@@ -104,6 +104,7 @@ class MPU9250_ {
     QuaternionFilter quat_filter;
 
     // Other settings
+    bool has_connected {false};
     bool b_ahrs {true};
     bool b_verbose {false};
 
@@ -134,13 +135,16 @@ public:
             else {
                 if (b_verbose)
                     Serial.println("Could not connect to AK8963");
+                has_connected = false;
                 return false;
             }
         } else {
             if (b_verbose)
                 Serial.println("Could not connect to MPU9250");
+            has_connected = false;
             return false;
         }
+        has_connected = true;
         return true;
     }
 
@@ -161,7 +165,8 @@ public:
     }
 
     bool isConnected() {
-        return isConnectedMPU9250() && isConnectedAK8963();
+        has_connected = isConnectedMPU9250() && isConnectedAK8963();
+        return has_connected;
     }
 
     bool isConnectedMPU9250() {
