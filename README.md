@@ -189,6 +189,20 @@ MPU9250Setting setting;
 mpu.setup(0x70, setting, sw);
 ```
 
+
+## About I2C Errors
+
+Sometimes this library shows the I2C error number if your connection is not correct. It's based on the I2C error number which is reported by the `Wire.endTransmission()`. It returns following number based on the result of I2C data transmission.
+
+> 0:success  
+> 1:data too long to fit in transmit buffer  
+> 2:received NACK on transmit of address  
+> 3:received NACK on transmit of data  
+> 4:other error  
+
+If you have such errors, please check your hardware connection and I2C address setting first. Please refer [Wire.endTransmission() reference](https://www.arduino.cc/en/Reference/WireEndTransmission) for these errors, and [section 2.3 of this explanation](https://www.ti.com/lit/an/slva704/slva704.pdf) for ACK and NACK.
+
+
 ## APIs
 
 ``` C++
