@@ -51,18 +51,18 @@ enum class ACCEL_DLPF_CFG : uint8_t {
     DLPF_420HZ,
 };
 
-static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE{0x71};
-static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE{0x73};
+static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE {0x71};
+static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE {0x73};
 
 struct MPU9250Setting {
-    ACCEL_FS_SEL accel_fs_sel{ACCEL_FS_SEL::A16G};
-    GYRO_FS_SEL gyro_fs_sel{GYRO_FS_SEL::G2000DPS};
-    MAG_OUTPUT_BITS mag_output_bits{MAG_OUTPUT_BITS::M16BITS};
-    FIFO_SAMPLE_RATE fifo_sample_rate{FIFO_SAMPLE_RATE::SMPL_200HZ};
-    uint8_t gyro_fchoice{0x03};
-    GYRO_DLPF_CFG gyro_dlpf_cfg{GYRO_DLPF_CFG::DLPF_41HZ};
-    uint8_t accel_fchoice{0x01};
-    ACCEL_DLPF_CFG accel_dlpf_cfg{ACCEL_DLPF_CFG::DLPF_45HZ};
+    ACCEL_FS_SEL accel_fs_sel {ACCEL_FS_SEL::A16G};
+    GYRO_FS_SEL gyro_fs_sel {GYRO_FS_SEL::G2000DPS};
+    MAG_OUTPUT_BITS mag_output_bits {MAG_OUTPUT_BITS::M16BITS};
+    FIFO_SAMPLE_RATE fifo_sample_rate {FIFO_SAMPLE_RATE::SMPL_200HZ};
+    uint8_t gyro_fchoice {0x03};
+    GYRO_DLPF_CFG gyro_dlpf_cfg {GYRO_DLPF_CFG::DLPF_41HZ};
+    uint8_t accel_fchoice {0x01};
+    ACCEL_DLPF_CFG accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
 };
 
 template <typename WireType, uint8_t WHO_AM_I>
@@ -72,7 +72,7 @@ class MPU9250_ {
     static constexpr uint8_t AK8963_WHOAMI_DEFAULT_VALUE{0x48};
     uint8_t MPU9250_ADDRESS{MPU9250_DEFAULT_ADDRESS};
 
-    // settingsk
+    // settings
     MPU9250Setting setting;
     static constexpr uint8_t MAG_MODE{0x06};  // 0x02 for 8 Hz, 0x06 for 100 Hz continuous magnetometer data read
     float acc_resolution;                     // scale resolutions per LSB for the sensors
@@ -80,11 +80,11 @@ class MPU9250_ {
     float mag_resolution;                     // scale resolutions per LSB for the sensors
 
     // Calibration Parameters
-    float acc_bias[3]{0., 0., 0.};   // acc calibration value in ACCEL_FS_SEL: 2g
-    float gyro_bias[3]{0., 0., 0.};  // gyro calibration value in GYRO_FS_SEL: 250dps
-    float mag_bias_factory[3]{0., 0., 0.};
-    float mag_bias[3]{0., 0., 0.};  // mag calibration value in MAG_OUTPUT_BITS: 16BITS
-    float mag_scale[3]{1., 1., 1.};
+    float acc_bias[3] {0., 0., 0.};   // acc calibration value in ACCEL_FS_SEL: 2g
+    float gyro_bias[3] {0., 0., 0.};  // gyro calibration value in GYRO_FS_SEL: 250dps
+    float mag_bias_factory[3] {0., 0., 0.};
+    float mag_bias[3] {0., 0., 0.};  // mag calibration value in MAG_OUTPUT_BITS: 16BITS
+    float mag_scale[3] {1., 1., 1.};
     float magnetic_declination = -7.51;  // Japan, 24th June
 
     // Temperature
@@ -102,8 +102,8 @@ class MPU9250_ {
     QuaternionFilter quat_filter;
 
     // Other settings
-    bool b_ahrs{true};
-    bool b_verbose{false};
+    bool b_ahrs {true};
+    bool b_verbose {false};
 
     // I2C
     WireType* wire;
