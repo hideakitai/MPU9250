@@ -67,9 +67,9 @@ struct MPU9250Setting {
 
 template <typename WireType, uint8_t WHO_AM_I>
 class MPU9250_ {
-    static constexpr uint8_t MPU9250_DEFAULT_ADDRESS{0x68};  // Device address when ADO = 0
-    static constexpr uint8_t AK8963_ADDRESS{0x0C};           //  Address of magnetometer
-    static constexpr uint8_t AK8963_WHOAMI_DEFAULT_VALUE{0x48};
+    static constexpr uint8_t MPU9250_DEFAULT_ADDRESS {0x68};  // Device address when ADO = 0
+    static constexpr uint8_t AK8963_ADDRESS {0x0C};           //  Address of magnetometer
+    static constexpr uint8_t AK8963_WHOAMI_DEFAULT_VALUE {0x48};
     uint8_t mpu_i2c_addr {MPU9250_DEFAULT_ADDRESS};
 
     // settings
@@ -315,8 +315,8 @@ private:
         mag_resolution = get_mag_resolution(setting.mag_output_bits);
 
         // wake up device
-        delay(100);                                     // Wait for all registers to reset
         write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
+        delay(100);                                  // Wait for all registers to reset
 
         // get stable time source
         write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x01);  // Auto select clock source to be PLL gyroscope reference if ready else
@@ -333,17 +333,17 @@ private:
 
         // Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
         uint8_t sample_rate = (uint8_t)setting.fifo_sample_rate;
-                                                               // determined inset in CONFIG above
         write_byte(mpu_i2c_addr, SMPLRT_DIV, sample_rate);  // Use a 200 Hz rate; a rate consistent with the filter update rate
+                                                            // determined inset in CONFIG above
 
         // Set gyroscope full scale range
         // Range selects FS_SEL and GFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
-        c = c & ~0xE0;                                        // Clear self-test bits [7:5]
-        c = c & ~0x03;                                        // Clear Fchoice bits [1:0]
-        c = c & ~0x18;                                        // Clear GYRO_FS_SEL bits [4:3]
-        c = c | (uint8_t(setting.gyro_fs_sel) << 3);          // Set full scale range for the gyro
-        c = c | (uint8_t(setting.gyro_fchoice) & 0x03);       // Set Fchoice for the gyro
         uint8_t c = read_byte(mpu_i2c_addr, GYRO_CONFIG);  // get current GYRO_CONFIG register value
+        c = c & ~0xE0;                                     // Clear self-test bits [7:5]
+        c = c & ~0x03;                                     // Clear Fchoice bits [1:0]
+        c = c & ~0x18;                                     // Clear GYRO_FS_SEL bits [4:3]
+        c = c | (uint8_t(setting.gyro_fs_sel) << 3);       // Set full scale range for the gyro
+        c = c | (uint8_t(setting.gyro_fchoice) & 0x03);    // Set Fchoice for the gyro
         write_byte(mpu_i2c_addr, GYRO_CONFIG, c);          // Write new GYRO_CONFIG value to register
 
         // Set accelerometer full-scale range configuration
@@ -456,15 +456,15 @@ private:
     }
 
     void read_accel_gyro(int16_t* destination) {
-        uint8_t raw_data[14];                                         // x/y/z accel register data stored here
-        destination[0] = ((int16_t)raw_data[0] << 8) | raw_data[1];   // Turn the MSB and LSB into a signed 16-bit value
-        destination[1] = ((int16_t)raw_data[2] << 8) | raw_data[3];
-        destination[2] = ((int16_t)raw_data[4] << 8) | raw_data[5];
-        destination[3] = ((int16_t)raw_data[6] << 8) | raw_data[7];
-        destination[4] = ((int16_t)raw_data[8] << 8) | raw_data[9];
-        destination[5] = ((int16_t)raw_data[10] << 8) | raw_data[11];
-        destination[6] = ((int16_t)raw_data[12] << 8) | raw_data[13];
+        uint8_t raw_data[14];                                                 // x/y/z accel register data stored here
         read_bytes(mpu_i2c_addr, ACCEL_XOUT_H, 14, &raw_data[0]);             // Read the 14 raw data registers into data array
+        destination[0] = ((int16_t)raw_data[0] << 8) | (int16_t)raw_data[1];  // Turn the MSB and LSB into a signed 16-bit value
+        destination[1] = ((int16_t)raw_data[2] << 8) | (int16_t)raw_data[3];
+        destination[2] = ((int16_t)raw_data[4] << 8) | (int16_t)raw_data[5];
+        destination[3] = ((int16_t)raw_data[6] << 8) | (int16_t)raw_data[7];
+        destination[4] = ((int16_t)raw_data[8] << 8) | (int16_t)raw_data[9];
+        destination[5] = ((int16_t)raw_data[10] << 8) | (int16_t)raw_data[11];
+        destination[6] = ((int16_t)raw_data[12] << 8) | (int16_t)raw_data[13];
     }
 
     void update_mag() {
@@ -495,9 +495,9 @@ private:
     }
 
     int16_t read_temperature_data() {
-        uint8_t raw_data[2];                                       // x/y/z gyro register data stored here
-        return ((int16_t)raw_data[0] << 8) | raw_data[1];          // Turn the MSB and LSB into a 16-bit value
+        uint8_t raw_data[2];                                    // x/y/z gyro register data stored here
         read_bytes(mpu_i2c_addr, TEMP_OUT_H, 2, &raw_data[0]);  // Read the two raw data registers sequentially into data array
+        return ((int16_t)raw_data[0] << 8) | raw_data[1];       // Turn the MSB and LSB into a 16-bit value
     }
 
     // Function which accumulates gyro and accelerometer data after device initialization. It calculates the average
@@ -541,14 +541,14 @@ private:
         write_byte(mpu_i2c_addr, ACCEL_CONFIG, 0x00);  // Set accelerometer full-scale to 2 g, maximum sensitivity
 
         // Configure FIFO to capture accelerometer and gyro data for bias calculation
-        delay(40);                                     // accumulate 40 samples in 40 milliseconds = 480 bytes
         write_byte(mpu_i2c_addr, USER_CTRL, 0x40);  // Enable FIFO
         write_byte(mpu_i2c_addr, FIFO_EN, 0x78);    // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9150)
+        delay(40);                                  // accumulate 40 samples in 40 milliseconds = 480 bytes
     }
 
     void collect_acc_gyro_data_to(float* a_bias, float* g_bias) {
         // At end of sample accumulation, turn off FIFO sensor read
-        uint8_t data[12];                                       // data array to hold accelerometer and gyro x, y, z, data
+        uint8_t data[12];                                    // data array to hold accelerometer and gyro x, y, z, data
         write_byte(mpu_i2c_addr, FIFO_EN, 0x00);             // Disable gyro and accelerometer sensors for FIFO
         read_bytes(mpu_i2c_addr, FIFO_COUNTH, 2, &data[0]);  // read FIFO sample count
         uint16_t fifo_count = ((uint16_t)data[0] << 8) | data[1];
@@ -594,7 +594,7 @@ private:
         // the accelerometer biases calculated above must be divided by 8.
 
         uint8_t read_data[2] = {0};
-        int16_t acc_bias_reg[3] = {0, 0, 0};                         // A place to hold the factory accelerometer trim biases
+        int16_t acc_bias_reg[3] = {0, 0, 0};                      // A place to hold the factory accelerometer trim biases
         read_bytes(mpu_i2c_addr, XA_OFFSET_H, 2, &read_data[0]);  // Read factory accelerometer trim values
         acc_bias_reg[0] = ((int16_t)read_data[0] << 8) | read_data[1];
         read_bytes(mpu_i2c_addr, YA_OFFSET_H, 2, &read_data[0]);
@@ -634,7 +634,7 @@ private:
 
     void write_gyro_offset() {
         // Construct the gyro biases for push to the hardware gyro bias registers, which are reset to zero upon device startup
-        uint8_t gyro_offset_data[6]{0};
+        uint8_t gyro_offset_data[6] {0};
         gyro_offset_data[0] = (-(int16_t)gyro_bias[0] / 4 >> 8) & 0xFF;  // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
         gyro_offset_data[1] = (-(int16_t)gyro_bias[0] / 4) & 0xFF;       // Biases are additive, so change sign on calculated average gyro biases
         gyro_offset_data[2] = (-(int16_t)gyro_bias[1] / 4 >> 8) & 0xFF;
@@ -777,9 +777,9 @@ private:
         }
 
         // Configure the accelerometer for self-test
-        delay(25);                                        // Delay a while to let the device stabilize
         write_byte(mpu_i2c_addr, ACCEL_CONFIG, 0xE0);  // Enable self test on all three axes and set accelerometer range to +/- 2 g
         write_byte(mpu_i2c_addr, GYRO_CONFIG, 0xE0);   // Enable self test on all three axes and set gyro range to +/- 250 degrees/s
+        delay(25);                                     // Delay a while to let the device stabilize
 
         for (int ii = 0; ii < 200; ii++) {  // get average self-test values of gyro and acclerometer
 
