@@ -74,10 +74,10 @@ class MPU9250_ {
 
     // settings
     MPU9250Setting setting;
-    static constexpr uint8_t MAG_MODE{0x06};  // 0x02 for 8 Hz, 0x06 for 100 Hz continuous magnetometer data read
-    float acc_resolution;                     // scale resolutions per LSB for the sensors
-    float gyro_resolution;                    // scale resolutions per LSB for the sensors
-    float mag_resolution;                     // scale resolutions per LSB for the sensors
+    static constexpr uint8_t MAG_MODE {0x06};  // 0x02 for 8 Hz, 0x06 for 100 Hz continuous magnetometer data read
+    float acc_resolution {0.f};                // scale resolutions per LSB for the sensors
+    float gyro_resolution {0.f};               // scale resolutions per LSB for the sensors
+    float mag_resolution {0.f};                // scale resolutions per LSB for the sensors
 
     // Calibration Parameters
     float acc_bias[3] {0., 0., 0.};   // acc calibration value in ACCEL_FS_SEL: 2g
@@ -88,17 +88,19 @@ class MPU9250_ {
     float magnetic_declination = -7.51;  // Japan, 24th June
 
     // Temperature
-    int16_t temperature_count;  // temperature raw count output
-    float temperature;          // Stores the real internal chip temperature in degrees Celsius
+    int16_t temperature_count {0};  // temperature raw count output
+    float temperature {0.f};        // Stores the real internal chip temperature in degrees Celsius
 
     // Self Test
-    float self_test_result[6];  // holds results of gyro and accelerometer self test
+    float self_test_result[6] {0.f};  // holds results of gyro and accelerometer self test
 
     // IMU Data
-    float a[3], g[3], m[3];
+    float a[3] {0.f, 0.f, 0.f};
+    float g[3] {0.f, 0.f, 0.f};
+    float m[3] {0.f, 0.f, 0.f};
     float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};  // vector to hold quaternion
-    float euler[3] = {0.f};
-    float lin_acc[3];  // linear acceleration (acceleration with gravity component subtracted)
+    float euler[3] {0.f, 0.f, 0.f};
+    float lin_acc[3] {0.f, 0.f, 0.f};  // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
 
     // Other settings
@@ -110,8 +112,8 @@ class MPU9250_ {
     uint8_t i2c_err_;
 
 public:
-    static constexpr uint16_t CALIB_GYRO_SENSITIVITY = 131;     // = 131 LSB/degrees/sec
-    static constexpr uint16_t CALIB_ACCEL_SENSITIVITY = 16384;  // = 16384 LSB/g
+    static constexpr uint16_t CALIB_GYRO_SENSITIVITY {131};     // LSB/degrees/sec
+    static constexpr uint16_t CALIB_ACCEL_SENSITIVITY {16384};  // LSB/g
 
     bool setup(const uint8_t addr, const MPU9250Setting& mpu_setting = MPU9250Setting(), WireType& w = Wire) {
         // addr should be valid for MPU
