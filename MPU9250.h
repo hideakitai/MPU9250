@@ -53,6 +53,7 @@ enum class ACCEL_DLPF_CFG : uint8_t {
 
 static constexpr uint8_t MPU9250_WHOAMI_DEFAULT_VALUE {0x71};
 static constexpr uint8_t MPU9255_WHOAMI_DEFAULT_VALUE {0x73};
+static constexpr uint8_t MPU6500_WHOAMI_DEFAULT_VALUE {0x70};
 
 struct MPU9250Setting {
     ACCEL_FS_SEL accel_fs_sel {ACCEL_FS_SEL::A16G};
@@ -175,7 +176,10 @@ public:
             Serial.print("MPU9250 WHO AM I = ");
             Serial.println(c, HEX);
         }
-        return (c == MPU9250_WHOAMI_DEFAULT_VALUE) || (c == MPU9255_WHOAMI_DEFAULT_VALUE);
+        bool b = (c == MPU9250_WHOAMI_DEFAULT_VALUE);
+        b |= (c == MPU9255_WHOAMI_DEFAULT_VALUE);
+        b |= (c == MPU6500_WHOAMI_DEFAULT_VALUE);
+        return b;
     }
 
     bool isConnectedAK8963() {
