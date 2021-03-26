@@ -11,7 +11,7 @@ void scan_mpu(WireType& wire = Wire) {
         wire.beginTransmission(i);
         if (wire.endTransmission() == 0) {
             addrs[device_count++] = i;
-            delay(1);
+            delay(10);
         }
     }
     Serial.print("Found ");
