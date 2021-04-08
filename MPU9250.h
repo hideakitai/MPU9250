@@ -932,6 +932,7 @@ private:
         i2c_err_ = wire->endTransmission(false);  // Send the Tx buffer, but send a restart to keep connection alive
         if (i2c_err_) print_i2c_error();
         wire->requestFrom(address, (size_t)1);       // Read one byte from slave register address
+        if(!wait_for_i2c_data(3)) return data;
         if (wire->available()) data = wire->read();  // Fill Rx buffer with result
         return data;                                 // Return data read from slave register
     }
@@ -943,6 +944,7 @@ private:
         if (i2c_err_) print_i2c_error();
         uint8_t i = 0;
         wire->requestFrom(address, count);  // Read bytes from slave register address
+        if(!wait_for_i2c_data(3)) return;
         while (wire->available()) {
             dest[i++] = wire->read();
         }  // Put read results in the Rx buffer
@@ -952,6 +954,27 @@ private:
         if (i2c_err_ == 7) return;  // to avoid stickbreaker-i2c branch's error code
         Serial.print("I2C ERROR CODE : ");
         Serial.println(i2c_err_);
+    }
+
+    bool wait_for_i2c_data(unsigned long tout) {
+        unsigned long startTime = millis();
+        while (!wire->available()) {
+            unsigned long currentTime = millis();
+
+            // Millis overflow happened!
+            // So handle it by restarting the timeout
+            // Shouldn't matter that much as it's like once per 50 days
+            if(currentTime < startTime){
+                startTime = millis();
+                currentTime = millis();
+            }
+            // Allow like 3ms to perform operation then timeout
+            else if(currentTime - startTime >= tout){
+                return false;
+            }
+        }
+
+        return true;
     }
 };
 
