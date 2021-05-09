@@ -11,7 +11,7 @@ void scan_mpu(WireType& wire = Wire) {
         wire.beginTransmission(i);
         if (wire.endTransmission() == 0) {
             addrs[device_count++] = i;
-            delay(1);
+            delay(10);
         }
     }
     Serial.print("Found ");
@@ -56,11 +56,13 @@ void setup() {
     for (uint8_t i = 0; i < device_count; ++i) {
         Serial.print("I2C address 0x");
         Serial.print(addrs[i], HEX);
-        byte c = readByte(addrs[i], WHO_AM_I_MPU9250);
-        if (c == MPU9250_WHOAMI_DEFAULT_VALUE) {
+        byte ca = readByte(addrs[i], WHO_AM_I_MPU9250);
+        if (ca == MPU9250_WHOAMI_DEFAULT_VALUE) {
             Serial.println(" is MPU9250 and ready to use");
-        } else if (c == MPU9255_WHOAMI_DEFAULT_VALUE) {
+        } else if (ca == MPU9255_WHOAMI_DEFAULT_VALUE) {
             Serial.println(" is MPU9255 and ready to use");
+        } else if (ca == MPU6500_WHOAMI_DEFAULT_VALUE) {
+            Serial.println(" is MPU6500 and ready to use");
         } else {
             Serial.println(" is not MPU series. Please use correct device");
         }
