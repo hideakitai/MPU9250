@@ -70,6 +70,7 @@ struct MPU9250Setting {
     uint8_t accel_fchoice {0x01};
     ACCEL_DLPF_CFG accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
     COORDINATES_SEL coordinates_sel {COORDINATES_SEL::NED};
+};
 
 template <typename WireType>
 class MPU9250_ {
@@ -365,7 +366,7 @@ private:
         mag_resolution = get_mag_resolution(setting.mag_output_bits);
 
         
-        write_byte(MPU9250_ADDRESS, PWR_MGMT_1, 0x80);  // Write a one to bit 7 reset bit; toggle reset device
+        write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x80);  // Write a one to bit 7 reset bit; toggle reset device
         delay(100);
         // wake up device
         write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
@@ -392,13 +393,13 @@ private:
         // Set gyroscope full scale range
         // Range selects FS_SEL and GFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
 
-        uint8_t c = read_byte(MPU9250_ADDRESS, GYRO_CONFIG);  // get current GYRO_CONFIG register value
+        uint8_t c = read_byte(mpu_i2c_addr, GYRO_CONFIG);  // get current GYRO_CONFIG register value
         c = c & ~0xE0;                                        // Clear self-test bits [7:5]
         c = c & ~0x03;                                        // Clear Fchoice bits [1:0]
         c = c & ~0x18;                                        // Clear GYRO_FS_SEL bits [4:3]
         c = c | (uint8_t(setting.gyro_fs_sel) << 3);          // Set full scale range for the gyro
         c = c | (uint8_t(~setting.gyro_fchoice) & 0x03);       // Set Fchoice for the gyro by loading complement of Fchoice into Fchoice_b bits.
-        write_byte(MPU9250_ADDRESS, GYRO_CONFIG, c);          // Write new GYRO_CONFIG value to register
+        write_byte(mpu_i2c_addr, GYRO_CONFIG, c);          // Write new GYRO_CONFIG value to register
 
         // Set accelerometer full-scale range configuration
         c = read_byte(mpu_i2c_addr, ACCEL_CONFIG);     // get current ACCEL_CONFIG register value
