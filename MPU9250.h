@@ -115,10 +115,6 @@ class MPU9250_ {
     bool b_ahrs{true};
     bool b_verbose{false};
     int mag_time_out {1000};  // Timeout for read_mag in ms
-    int experimental_mag_sliding_size {1};
-    int experimental_mag_sample_count {1500};
-    bool experimental_mag_flipping_on {false};
-    int experimental_mag_print_ratio {1};
 
     // I2C
     WireType* wire;
@@ -171,25 +167,7 @@ public:
     void set_mag_time_out(const int milliseconds){
         mag_time_out = milliseconds;
     }
-
-    void set_mag_sliding_size(const int sliding_size){
-        experimental_mag_sliding_size = sliding_size;
-    }
-
-    void set_mag_sample_count(const int sample_count){
-        experimental_mag_sample_count = sample_count;
-    }
     
-
-    void set_mag_filliping(const bool flipping_on){
-        experimental_mag_flipping_on = flipping_on;
-    }
-
-    void set_mag_print_ratio(const int print_ratio){
-        experimental_mag_print_ratio = print_ratio;
-    }
-    
-
 
     void calibrateAccelGyro() {
         calibrate_acc_gyro_impl();
@@ -722,8 +700,7 @@ private:
         setting.mag_output_bits = MAG_OUTPUT_BITS::M16BITS;
         initAK8963();
 
-        if(experimental_mag_flipping_on) collect_flipping_mag_data_to(mag_bias);
-        else collect_mag_data_to(mag_bias, mag_scale);
+        collect_mag_data_to(mag_bias, mag_scale);
         
 
         if (b_verbose) {
@@ -750,135 +727,69 @@ private:
         initAK8963();
     }
 
-    int16_t sliding_window(int16_t x_input, int n_window, int16_t* buffer){
-      for (int i = (n_window - 1); i > 0; --i){
-        buffer[i] = buffer[i - 1];
-      }
-      buffer[0] = x_input;
-      double sum = 0;
-      for (int i = 0; i < n_window; ++i) sum += buffer[i];
-      sum /= n_window;
-      return (int16_t) sum;
-    }
-
-    void collect_flipping_mag_data_to(float* m_bias) {
-        
-        char stage = 'A';
-        uint16_t sample_count = 100;
-        int16_t mag_temp[3] = {0, 0, 0};
-        long int mag_sum[3] = {0, 0, 0};
-        if (MAG_MODE == 0x02)
-            sample_count = 128;     // at 8 Hz ODR, new mag data is available every 125 ms
-        else if (MAG_MODE == 0x06)  // in this library, fixed to 100Hz
-
-        for (int i_stage = 0; i_stage < 4; ++i_stage)
-        {
-          Serial.print("Device should be put in Flipping position ");Serial.println(stage);
-          if(i_stage > 0) delay(10000);
-          Serial.print("Starting measurements for stage ");Serial.println(stage);
-          for (uint16_t ii = 0; ii < sample_count; ii++) {
-              read_mag(mag_temp);  // Read the mag data
-              for (int jj = 0; jj < 3; ++jj) mag_sum[jj] += mag_temp[jj];
-              delay(12);
-          }
-          ++stage;
-        }
-        Serial.println("Finished measurements");
-        float bias_resolution = get_mag_resolution(MAG_OUTPUT_BITS::M16BITS);
-        for (int jj = 0; jj < 3; ++jj){
-          m_bias[jj] = (float) mag_sum[jj] / sample_count / 4  * bias_resolution * mag_bias_factory[jj];
-        }
-    }
-
-
     void collect_mag_data_to(float* m_bias, float* m_scale) {
-        if (b_verbose)
-            Serial.println("Mag Calibration: Tumble device until done!");
-        delay(4000);
+            if (b_verbose)
+                Serial.println("Mag Calibration: Wave device in a figure eight until done!");
+            delay(4000);
 
-        // shoot for ~fifteen seconds of mag data
-        uint16_t sample_count = 0;
-        if (MAG_MODE == 0x02)
-            sample_count = 128;     // at 8 Hz ODR, new mag data is available every 125 ms
-        else if (MAG_MODE == 0x06)  // in this library, fixed to 100Hz
-            sample_count = experimental_mag_sample_count;    // at 100 Hz ODR, new mag data is available every 10 ms
+            // shoot for ~fifteen seconds of mag data
+            uint16_t sample_count = 0;
+            if (MAG_MODE == 0x02)
+                sample_count = 128;     // at 8 Hz ODR, new mag data is available every 125 ms
+            else if (MAG_MODE == 0x06)  // in this library, fixed to 100Hz
+                sample_count = 1500;    // at 100 Hz ODR, new mag data is available every 10 ms
 
-        int32_t bias[3] = {0, 0, 0};
-        float scale[3] = {0.0, 0.0, 0.0};
-        int16_t mag_max[3] = {-32767, -32767, -32767};
-        int16_t mag_min[3] = {32767, 32767, 32767};
-        int16_t mag_temp[3] = {0, 0, 0};
-
-        const int n_sliding = experimental_mag_sliding_size;
-        int16_t mag_avg_buffer[3][n_sliding] = {0};
-        int16_t mag_avg[3] = {0, 0, 0};
-        for (uint16_t ii = 0; ii < sample_count; ii++) {
-            read_mag(mag_temp);  // Read the mag data
-
-            // initialize mag_avg_buffer
-            if(ii == 0){
-              for (int jj = 0; jj < 3; ++jj)
-              {
-                for (int kk = 0;kk < n_sliding; ++kk)
-                {
-                  mag_avg_buffer[jj][kk] = mag_temp[jj];
+            int32_t bias[3] = {0, 0, 0}, scale[3] = {0, 0, 0};
+            int16_t mag_max[3] = {-32767, -32767, -32767};
+            int16_t mag_min[3] = {32767, 32767, 32767};
+            int16_t mag_temp[3] = {0, 0, 0};
+            for (uint16_t ii = 0; ii < sample_count; ii++) {
+                read_mag(mag_temp);  // Read the mag data
+                for (int jj = 0; jj < 3; jj++) {
+                    if (mag_temp[jj] > mag_max[jj]) mag_max[jj] = mag_temp[jj];
+                    if (mag_temp[jj] < mag_min[jj]) mag_min[jj] = mag_temp[jj];
                 }
-              }
+                if (MAG_MODE == 0x02) delay(135);  // at 8 Hz ODR, new mag data is available every 125 ms
+                if (MAG_MODE == 0x06) delay(12);   // at 100 Hz ODR, new mag data is available every 10 ms
             }
 
-            for (int jj = 0; jj < 3; ++jj){
-                mag_avg[jj] = sliding_window(mag_temp[jj], n_sliding, mag_avg_buffer[jj]);
-            }
-            for (int jj = 0; jj < 3; jj++) {
-                if (mag_avg[jj] > mag_max[jj]) mag_max[jj] = mag_avg[jj];
-                if (mag_avg[jj] < mag_min[jj]) mag_min[jj] = mag_avg[jj];
-            }
-            if (MAG_MODE == 0x02) delay(135);  // at 8 Hz ODR, new mag data is available every 125 ms
-            if (MAG_MODE == 0x06) delay(12);   // at 100 Hz ODR, new mag data is available every 10 ms
-            if (b_verbose && (ii % experimental_mag_print_ratio)  == 0){
-                Serial.print(mag_avg[0]);Serial.print(", ");
-                Serial.print(mag_avg[1]);Serial.print(", ");
-                Serial.println(mag_avg[2]);
+            if (b_verbose) {
+                Serial.println("mag x min/max:");
+                Serial.println(mag_max[0]);
+                Serial.println(mag_min[0]);
+                Serial.println("mag y min/max:");
+                Serial.println(mag_max[1]);
+                Serial.println(mag_min[1]);
+                Serial.println("mag z min/max:");
+                Serial.println(mag_max[2]);
+                Serial.println(mag_min[2]);
             }
 
+            // Get hard iron correction
+            bias[0] = (mag_max[0] + mag_min[0]) / 2;  // get average x mag bias in counts
+            bias[1] = (mag_max[1] + mag_min[1]) / 2;  // get average y mag bias in counts
+            bias[2] = (mag_max[2] + mag_min[2]) / 2;  // get average z mag bias in counts
+
+            float bias_resolution = get_mag_resolution(MAG_OUTPUT_BITS::M16BITS);
+            m_bias[0] = (float)bias[0] * bias_resolution * mag_bias_factory[0];  // save mag biases in G for main program
+            m_bias[1] = (float)bias[1] * bias_resolution * mag_bias_factory[1];
+            m_bias[2] = (float)bias[2] * bias_resolution * mag_bias_factory[2];
+
+            // Get soft iron correction estimate
+            //*** multiplication by mag_bias_factory added in accordance with the following comment
+            //*** https://github.com/kriswiner/MPU9250/issues/456#issue-836657973
+            scale[0] = (float)(mag_max[0] - mag_min[0]) * mag_bias_factory[0] / 2;  // get average x axis max chord length in counts
+            scale[1] = (float)(mag_max[1] - mag_min[1]) * mag_bias_factory[1] / 2;  // get average y axis max chord length in counts
+            scale[2] = (float)(mag_max[2] - mag_min[2]) * mag_bias_factory[2]/ 2;  // get average z axis max chord length in counts
+
+            float avg_rad = scale[0] + scale[1] + scale[2];
+            avg_rad /= 3.0;
+
+            m_scale[0] = avg_rad / ((float)scale[0]);
+            m_scale[1] = avg_rad / ((float)scale[1]);
+            m_scale[2] = avg_rad / ((float)scale[2]);
         }
 
-        if (b_verbose) {
-            Serial.println("mag x min/max:");
-            Serial.println(mag_max[0]);
-            Serial.println(mag_min[0]);
-            Serial.println("mag y min/max:");
-            Serial.println(mag_max[1]);
-            Serial.println(mag_min[1]);
-            Serial.println("mag z min/max:");
-            Serial.println(mag_max[2]);
-            Serial.println(mag_min[2]);
-        }
-
-        // Get hard iron correction
-        bias[0] = (mag_max[0] + mag_min[0]) / 2;  // get average x mag bias in counts
-        bias[1] = (mag_max[1] + mag_min[1]) / 2;  // get average y mag bias in counts
-        bias[2] = (mag_max[2] + mag_min[2]) / 2;  // get average z mag bias in counts
-
-        float bias_resolution = get_mag_resolution(MAG_OUTPUT_BITS::M16BITS);
-        m_bias[0] = (float)bias[0] * bias_resolution * mag_bias_factory[0];  // save mag biases in G for main program
-        m_bias[1] = (float)bias[1] * bias_resolution * mag_bias_factory[1];
-        m_bias[2] = (float)bias[2] * bias_resolution * mag_bias_factory[2];
-
-        // Get soft iron correction estimate
-        //*** multiplication by mag_bias_factory added in accordance with the following comment
-        //*** https://github.com/kriswiner/MPU9250/issues/456#issue-836657973
-        scale[0] = (float)(mag_max[0] - mag_min[0]) * mag_bias_factory[0] / 2;  // get average x axis max chord length in counts
-        scale[1] = (float)(mag_max[1] - mag_min[1]) * mag_bias_factory[1] / 2;  // get average y axis max chord length in counts
-        scale[2] = (float)(mag_max[2] - mag_min[2]) * mag_bias_factory[2]/ 2;  // get average z axis max chord length in counts
-
-        float avg_rad = scale[0] + scale[1] + scale[2];
-        avg_rad /= 3.0;
-
-        m_scale[0] = avg_rad / ((float)scale[0]);
-        m_scale[1] = avg_rad / ((float)scale[1]);
-        m_scale[2] = avg_rad / ((float)scale[2]);
-    }
 
     // Accelerometer and gyroscope self test; check calibration wrt factory settings
     bool self_test_impl()  // Should return percent deviation from factory trim values, +/- 14 or less deviation is a pass

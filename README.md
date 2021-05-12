@@ -34,7 +34,7 @@ void loop() {
 - accel/gyro/mag offsets are **NOT stored** to register if the MPU has powered off ([app note](https://www.digikey.com/en/pdf/i/invensense/mpu-hardware-offset-registers))
 - need to **set all offsets at every bootup by yourself** (or calibrate at every bootup)
 - device should be stay still during accel/gyro calibration
-- During magnetometer calibration, perform a series of tumbling actions with the aim of rotating the MPU9250 through as many angular orientations as possible. If possible, print out scatter plots of the x-y, y-z, and z-y axes readings to ensure that the end points are being captured. Please see this [article](https://github.com/kriswiner/MPU6050/wiki/Simple-and-Effective-Magnetometer-Calibration) and this [technical note](http://www.philomaths.org/papers/calibration) for more information on magnetometer calibration. The appendix of the tecnical note contains information on experimental methods for calibration.
+- round device around during mag calibration
 
 ``` C++
 #include "MPU9250.h"
@@ -276,18 +276,6 @@ void setMagneticDeclination(const float d);
 
 void selectFilter(QuatFilterSel sel);
 bool selftest();
-```
-
-## Experimental APIs
-**Warning:** these may be altered or deleted in next release.
-
-These APIs are for experimenting with magnetometer calibration methods.
-``` C++
-void set_mag_time_out(const int milliseconds);
-void set_mag_sliding_size(const int sliding_size);
-void set_mag_sample_count(const int sample_count);
-void set_mag_filliping(const bool flipping_on);
-void set_mag_print_ratio(const int print_ratio);
 ```
 
 ## License
