@@ -480,29 +480,38 @@ private:
 
     void update_mag() {
         int16_t mag_count[3] = {0, 0, 0};  // Stores the 16-bit signed magnetometer sensor output
-        read_mag(mag_count);               // Read the x/y/z adc values
-        // get_mag_resolution();
 
-        // Calculate the magnetometer values in milliGauss
-        // Include factory calibration per data sheet and user environmental corrections
-        // mag_bias is calcurated in 16BITS
-        float bias_to_current_bits = mag_resolution / get_mag_resolution(MAG_OUTPUT_BITS::M16BITS);
-        m[0] = (float)(mag_count[0] * mag_resolution * mag_bias_factory[0] - mag_bias[0] * bias_to_current_bits) * mag_scale[0];  // get actual magnetometer value, this depends on scale being set
-        m[1] = (float)(mag_count[1] * mag_resolution * mag_bias_factory[1] - mag_bias[1] * bias_to_current_bits) * mag_scale[1];
-        m[2] = (float)(mag_count[2] * mag_resolution * mag_bias_factory[2] - mag_bias[2] * bias_to_current_bits) * mag_scale[2];
+        // Read the x/y/z adc values
+        if (read_mag(mag_count)) {
+            // Calculate the magnetometer values in milliGauss
+            // Include factory calibration per data sheet and user environmental corrections
+            // mag_bias is calcurated in 16BITS
+            float bias_to_current_bits = mag_resolution / get_mag_resolution(MAG_OUTPUT_BITS::M16BITS);
+            m[0] = (float)(mag_count[0] * mag_resolution * mag_bias_factory[0] - mag_bias[0] * bias_to_current_bits) * mag_scale[0];  // get actual magnetometer value, this depends on scale being set
+            m[1] = (float)(mag_count[1] * mag_resolution * mag_bias_factory[1] - mag_bias[1] * bias_to_current_bits) * mag_scale[1];
+            m[2] = (float)(mag_count[2] * mag_resolution * mag_bias_factory[2] - mag_bias[2] * bias_to_current_bits) * mag_scale[2];
+        }
     }
 
-    void read_mag(int16_t* destination) {
-        uint8_t raw_data[7];                                                 // x/y/z gyro register data, ST2 register stored here, must read ST2 at end of data acquisition
-        if (read_byte(AK8963_ADDRESS, AK8963_ST1) & 0x01) {                  // wait for magnetometer data ready bit to be set
+    bool read_mag(int16_t* destination) {
+        const uint8_t st1 = read_byte(AK8963_ADDRESS, AK8963_ST1);
+        if (st1 & 0x01) {                                                    // wait for magnetometer data ready bit to be set
+            uint8_t raw_data[7];                                             // x/y/z gyro register data, ST2 register stored here, must read ST2 at end of data acquisition
             read_bytes(AK8963_ADDRESS, AK8963_XOUT_L, 7, &raw_data[0]);      // Read the six raw data and ST2 registers sequentially into data array
+            if (MAG_MODE == 0x02 || MAG_MODE == 0x04 || MAG_MODE == 0x06) {  // continuous or external trigger read mode
+                if ((st1 & 0x02) != 0)                                       // check if data is not skipped
+                    return false;                                            // this should be after data reading to clear DRDY register
+            }
+
             uint8_t c = raw_data[6];                                         // End data read by reading ST2 register
             if (!(c & 0x08)) {                                               // Check if magnetic sensor overflow set, if not then report data
                 destination[0] = ((int16_t)raw_data[1] << 8) | raw_data[0];  // Turn the MSB and LSB into a signed 16-bit value
                 destination[1] = ((int16_t)raw_data[3] << 8) | raw_data[2];  // Data stored as little Endian
                 destination[2] = ((int16_t)raw_data[5] << 8) | raw_data[4];
+                return true;
             }
         }
+        return false;
     }
 
     int16_t read_temperature_data() {
