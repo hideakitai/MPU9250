@@ -75,6 +75,7 @@ class MPU9250_ {
 
     // settings
     MPU9250Setting setting;
+    // TODO: this should be configured!!
     static constexpr uint8_t MAG_MODE {0x06};  // 0x02 for 8 Hz, 0x06 for 100 Hz continuous magnetometer data read
     float acc_resolution {0.f};                // scale resolutions per LSB for the sensors
     float gyro_resolution {0.f};               // scale resolutions per LSB for the sensors
@@ -354,7 +355,7 @@ private:
         c = c & ~0x03;                                     // Clear Fchoice bits [1:0]
         c = c & ~0x18;                                     // Clear GYRO_FS_SEL bits [4:3]
         c = c | (uint8_t(setting.gyro_fs_sel) << 3);       // Set full scale range for the gyro
-        c = c | (uint8_t(setting.gyro_fchoice) & 0x03);    // Set Fchoice for the gyro
+        c = c | (uint8_t(~setting.gyro_fchoice) & 0x03);   // Set Fchoice for the gyro
         write_byte(mpu_i2c_addr, GYRO_CONFIG, c);          // Write new GYRO_CONFIG value to register
 
         // Set accelerometer full-scale range configuration
