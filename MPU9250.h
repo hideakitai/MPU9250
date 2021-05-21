@@ -326,6 +326,10 @@ private:
         gyro_resolution = get_gyro_resolution(setting.gyro_fs_sel);
         mag_resolution = get_mag_resolution(setting.mag_output_bits);
 
+        // reset device
+        write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x80);  // Write a one to bit 7 reset bit; toggle reset device
+        delay(100);
+
         // wake up device
         write_byte(mpu_i2c_addr, PWR_MGMT_1, 0x00);  // Clear sleep mode bit (6), enable all sensors
         delay(100);                                  // Wait for all registers to reset
