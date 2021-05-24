@@ -757,9 +757,11 @@ private:
         m_bias[2] = (float)bias[2] * bias_resolution * mag_bias_factory[2];
 
         // Get soft iron correction estimate
-        scale[0] = (mag_max[0] - mag_min[0]) / 2;  // get average x axis max chord length in counts
-        scale[1] = (mag_max[1] - mag_min[1]) / 2;  // get average y axis max chord length in counts
-        scale[2] = (mag_max[2] - mag_min[2]) / 2;  // get average z axis max chord length in counts
+        //*** multiplication by mag_bias_factory added in accordance with the following comment
+        //*** https://github.com/kriswiner/MPU9250/issues/456#issue-836657973
+        scale[0] = (float)(mag_max[0] - mag_min[0]) * mag_bias_factory[0] / 2;  // get average x axis max chord length in counts
+        scale[1] = (float)(mag_max[1] - mag_min[1]) * mag_bias_factory[1] / 2;  // get average y axis max chord length in counts
+        scale[2] = (float)(mag_max[2] - mag_min[2]) * mag_bias_factory[2] / 2;  // get average z axis max chord length in counts
 
         float avg_rad = scale[0] + scale[1] + scale[2];
         avg_rad /= 3.0;
