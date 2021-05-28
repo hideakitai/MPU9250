@@ -1,5 +1,5 @@
 #include "MPU9250.h"
-#include "ArduinoOSC.h"
+#include "ArduinoOSCWiFi.h"
 
 MPU9250 mpu;
 
@@ -26,6 +26,12 @@ struct Euler {
     float z;
 } euler;
 
+struct RPY {
+    float r;
+    float p;
+    float y;
+} rpy;
+
 void setup() {
     Serial.begin(115200);
     Wire.begin();
@@ -48,6 +54,10 @@ void setup() {
         }
     }
 
+    // mpu.selectFilter(QuatFilterSel::NONE);
+    // mpu.selectFilter(QuatFilterSel::MADGWICK);
+    // mpu.selectFilter(QuatFilterSel::MAHONY);
+
     // calibrate anytime you want to
     Serial.println("Accel Gyro calibration will start in 5sec.");
     Serial.println("Please leave the device still on the flat plane.");
@@ -65,6 +75,7 @@ void setup() {
 
     OscWiFi.publish(host, publish_port, "/quat", quat.x, quat.y, quat.z, quat.w);
     OscWiFi.publish(host, publish_port, "/euler", euler.x, euler.y, euler.z);
+    OscWiFi.publish(host, publish_port, "/rpy", rpy.r, rpy.p, rpy.y);
 }
 
 void loop() {
@@ -81,6 +92,9 @@ void loop() {
         euler.x = mpu.getEulerX();
         euler.y = mpu.getEulerY();
         euler.z = mpu.getEulerZ();
+        rpy.r = mpu.getRoll();
+        rpy.p = mpu.getPitch();
+        rpy.y = mpu.getYaw();
     }
     OscWiFi.update();
 }
@@ -91,7 +105,21 @@ void print_roll_pitch_yaw() {
     Serial.print(", ");
     Serial.print(mpu.getPitch(), 2);
     Serial.print(", ");
-    Serial.println(mpu.getRoll(), 2);
+    Serial.print(mpu.getRoll(), 2);
+    Serial.print("  ");
+    Serial.print("Mag : ");
+    Serial.print(mpu.getMagX(), 2);
+    Serial.print(", ");
+    Serial.print(mpu.getMagY(), 2);
+    Serial.print(", ");
+    Serial.print(mpu.getMagZ(), 2);
+    Serial.print(", ");
+    Serial.print("lin_acc = ");
+    Serial.print(mpu.getLinearAccX(), 2);
+    Serial.print(", ");
+    Serial.print(mpu.getLinearAccY(), 2);
+    Serial.print(", ");
+    Serial.println(mpu.getLinearAccZ(), 2);
 }
 
 void print_calibration() {
