@@ -7,16 +7,22 @@
 #include "MPU9250/MPU9250RegisterMap.h"
 #include "MPU9250/QuaternionFilter.h"
 
-enum class ACCEL_FS_SEL { A2G,
-                          A4G,
-                          A8G,
-                          A16G };
-enum class GYRO_FS_SEL { G250DPS,
-                         G500DPS,
-                         G1000DPS,
-                         G2000DPS };
-enum class MAG_OUTPUT_BITS { M14BITS,
-                             M16BITS };
+enum class ACCEL_FS_SEL {
+    A2G,
+    A4G,
+    A8G,
+    A16G
+};
+enum class GYRO_FS_SEL {
+    G250DPS,
+    G500DPS,
+    G1000DPS,
+    G2000DPS
+};
+enum class MAG_OUTPUT_BITS {
+    M14BITS,
+    M16BITS
+};
 
 enum class FIFO_SAMPLE_RATE : uint8_t {
     SMPL_1000HZ,
@@ -371,11 +377,11 @@ private:
         // Set accelerometer sample rate configuration
         // It is possible to get a 4 kHz sample rate from the accelerometer by choosing 1 for
         // accel_fchoice_b bit [3]; in this case the bandwidth is 1.13 kHz
-        c = read_byte(mpu_i2c_addr, ACCEL_CONFIG2);              // get current ACCEL_CONFIG2 register value
-        c = c & ~0x0F;                                           // Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
-        c = c | (~(setting.accel_fchoice << 3) & 0x08);          // Set accel_fchoice_b to 1
-        c = c | (uint8_t(setting.accel_dlpf_cfg) & 0x07);        // Set accelerometer rate to 1 kHz and bandwidth to 41 Hz
-        write_byte(mpu_i2c_addr, ACCEL_CONFIG2, c);              // Write new ACCEL_CONFIG2 register value
+        c = read_byte(mpu_i2c_addr, ACCEL_CONFIG2);        // get current ACCEL_CONFIG2 register value
+        c = c & ~0x0F;                                     // Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
+        c = c | (~(setting.accel_fchoice << 3) & 0x08);    // Set accel_fchoice_b to 1
+        c = c | (uint8_t(setting.accel_dlpf_cfg) & 0x07);  // Set accelerometer rate to 1 kHz and bandwidth to 41 Hz
+        write_byte(mpu_i2c_addr, ACCEL_CONFIG2, c);        // Write new ACCEL_CONFIG2 register value
 
         // The accelerometer, gyro, and thermometer are set to 1 kHz sample rates,
         // but all these rates are further reduced by a factor of 5 to 200 Hz because of the SMPLRT_DIV setting
