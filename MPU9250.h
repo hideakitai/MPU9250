@@ -373,7 +373,7 @@ private:
         // accel_fchoice_b bit [3]; in this case the bandwidth is 1.13 kHz
         c = read_byte(mpu_i2c_addr, ACCEL_CONFIG2);              // get current ACCEL_CONFIG2 register value
         c = c & ~0x0F;                                           // Clear accel_fchoice_b (bit 3) and A_DLPFG (bits [2:0])
-        c = c | ((uint8_t(setting.accel_fchoice) & 0x01) << 3);  // Set accel_fchoice_b to 1
+        c = c | (~(setting.accel_fchoice << 3) & 0x08);          // Set accel_fchoice_b to 1
         c = c | uint8_t(setting.accel_dlpf_cfg);                 // Set accelerometer rate to 1 kHz and bandwidth to 41 Hz
         write_byte(mpu_i2c_addr, ACCEL_CONFIG2, c);              // Write new ACCEL_CONFIG2 register value
 
