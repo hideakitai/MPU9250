@@ -64,7 +64,10 @@ void setup() {
         } else if (ca == MPU6500_WHOAMI_DEFAULT_VALUE) {
             Serial.println(" is MPU6500 and ready to use");
         } else {
-            Serial.println(" is not MPU series. Please use correct device");
+            Serial.println(" is not MPU series");
+            Serial.print("WHO_AM_I is ");
+            Serial.println(ca, HEX);
+            Serial.println("Please use correct device");
         }
     }
 }
