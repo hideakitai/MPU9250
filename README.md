@@ -179,7 +179,7 @@ enum class QuatFilterSel {
 You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
 
 ``` C++
-MPU9250_<SoftWire, MPU9250_WHOAMI_DEFAULT_VALUE> mpu;
+MPU9250_<SoftWire> mpu;
 SoftWire sw(SDA, SCL);
 
 // you need setting struct
