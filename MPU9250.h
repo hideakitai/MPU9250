@@ -110,6 +110,7 @@ class MPU9250_ {
     float rpy[3] {0.f, 0.f, 0.f};
     float lin_acc[3] {0.f, 0.f, 0.f};  // linear acceleration (acceleration with gravity component subtracted)
     QuaternionFilter quat_filter;
+    size_t n_filter_iter {1};
 
     // Other settings
     bool has_connected {false};
@@ -231,7 +232,10 @@ public:
         float mn = +m[1];
         float me = -m[0];
         float md = +m[2];
-        quat_filter.update(an, ae, ad, gn, ge, gd, mn, me, md, q);
+
+        for (size_t i = 0; i < n_filter_iter; ++i) {
+            quat_filter.update(an, ae, ad, gn, ge, gd, mn, me, md, q);
+        }
 
         if (!b_ahrs) {
             temperature_count = read_temperature_data();               // Read the adc values
@@ -319,6 +323,10 @@ public:
 
     void selectFilter(QuatFilterSel sel) {
         quat_filter.select_filter(sel);
+    }
+
+    void setFilterIterations(const size_t n) {
+        if (n > 0) n_filter_iter = n;
     }
 
     bool selftest() {
