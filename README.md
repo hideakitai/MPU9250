@@ -173,6 +173,12 @@ enum class QuatFilterSel {
 };
 ```
 
+You can also change the calculate iterations for the filter as follows. The default value is 1. Generally 10-20 is good for stable yaw estimation. Please see [this discussion](https://github.com/kriswiner/MPU9250/issues/420) for the detail.
+
+```C++
+mpu.setFilterIterations(10);
+```
+
 
 ### Other I2C library
 
@@ -275,6 +281,8 @@ void setMagScale(const float x, const float y, const float z);
 void setMagneticDeclination(const float d);
 
 void selectFilter(QuatFilterSel sel);
+void setFilterIterations(const size_t n);
+
 bool selftest();
 ```
 
