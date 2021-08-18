@@ -749,14 +749,14 @@ private:
 
         if (b_verbose) {
             Serial.println("mag x min/max:");
-            Serial.println(mag_max[0]);
             Serial.println(mag_min[0]);
+            Serial.println(mag_max[0]);
             Serial.println("mag y min/max:");
-            Serial.println(mag_max[1]);
             Serial.println(mag_min[1]);
+            Serial.println(mag_max[1]);
             Serial.println("mag z min/max:");
-            Serial.println(mag_max[2]);
             Serial.println(mag_min[2]);
+            Serial.println(mag_max[2]);
         }
 
         // Get hard iron correction
