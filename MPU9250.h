@@ -156,6 +156,16 @@ public:
         has_connected = true;
         return true;
     }
+	
+	void sleep(bool b){
+		byte c = read_byte(mpu_i2c_addr, PWR_MGMT_1); // read the value, change sleep bit to match b, write byte back to register
+		if(b){
+			c = c | 0x40; // sets the sleep bit
+		} else {
+			c = c & 0xBF; // mask 1011111 keeps all the previous bits
+		}
+		write_byte(mpu_i2c_addr, PWR_MGMT_1, c);
+	}
 
     void verbose(const bool b) {
         b_verbose = b;
