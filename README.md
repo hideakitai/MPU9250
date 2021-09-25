@@ -215,11 +215,13 @@ If you have such errors, please check your hardware connection and I2C address s
 bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
 void verbose(const bool b);
 void ahrs(const bool b);
+void sleep(bool b);
 void calibrateAccelGyro();
 void calibrateMag();
 bool isConnected();
 bool isConnectedMPU9250();
 bool isConnectedAK8963();
+bool isSleeping();
 bool available();
 bool update();
 

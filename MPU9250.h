@@ -208,6 +208,12 @@ public:
         }
         return (c == AK8963_WHOAMI_DEFAULT_VALUE);
     }
+	
+	
+	bool isSleeping(){
+		byte c = read_byte(mpu_i2c_addr, PWR_MGMT_1);
+		return (c & 0x40) == 64;
+	}
 
     bool available() {
         return has_connected && (read_byte(mpu_i2c_addr, INT_STATUS) & 0x01);
