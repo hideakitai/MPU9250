@@ -448,6 +448,7 @@ private:
         }
     }
 
+public:
     void update_rpy(float qw, float qx, float qy, float qz) {
         // Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
         // In this coordinate system, the positive z-axis is down toward Earth.
@@ -499,6 +500,7 @@ private:
         g[2] = (float)raw_acc_gyro_data[6] * gyro_resolution;
     }
 
+private:
     void read_accel_gyro(int16_t* destination) {
         uint8_t raw_data[14];                                                 // x/y/z accel register data stored here
         read_bytes(mpu_i2c_addr, ACCEL_XOUT_H, 14, &raw_data[0]);             // Read the 14 raw data registers into data array
@@ -511,6 +513,7 @@ private:
         destination[6] = ((int16_t)raw_data[12] << 8) | (int16_t)raw_data[13];
     }
 
+public:
     void update_mag() {
         int16_t mag_count[3] = {0, 0, 0};  // Stores the 16-bit signed magnetometer sensor output
 
@@ -526,6 +529,7 @@ private:
         }
     }
 
+private:
     bool read_mag(int16_t* destination) {
         const uint8_t st1 = read_byte(AK8963_ADDRESS, AK8963_ST1);
         if (st1 & 0x01) {                                                    // wait for magnetometer data ready bit to be set
