@@ -156,13 +156,13 @@ public:
         has_connected = true;
         return true;
     }
-	
-    void sleep(bool b){
-        byte c = read_byte(mpu_i2c_addr, PWR_MGMT_1); // read the value, change sleep bit to match b, write byte back to register
-        if(b){
-            c = c | 0x40; // sets the sleep bit
+
+    void sleep(bool b) {
+        byte c = read_byte(mpu_i2c_addr, PWR_MGMT_1);  // read the value, change sleep bit to match b, write byte back to register
+        if (b) {
+            c = c | 0x40;  // sets the sleep bit
         } else {
-            c = c & 0xBF; // mask 1011111 keeps all the previous bits
+            c = c & 0xBF;  // mask 1011111 keeps all the previous bits
         }
         write_byte(mpu_i2c_addr, PWR_MGMT_1, c);
     }
@@ -208,9 +208,8 @@ public:
         }
         return (c == AK8963_WHOAMI_DEFAULT_VALUE);
     }
-	
-	
-    bool isSleeping(){
+
+    bool isSleeping() {
         byte c = read_byte(mpu_i2c_addr, PWR_MGMT_1);
         return (c & 0x40) == 0x40;
     }
