@@ -1,4 +1,5 @@
 # MPU9250
+
 Arduino library for [MPU9250](https://www.invensense.com/products/motion-tracking/9-axis/mpu-9250/) Nine-Axis (Gyro + Accelerometer + Compass) MEMS MotionTracking™ Device
 
 This library is based on the [great work](https://github.com/kriswiner/MPU9250) by [kriswiner](https://github.com/kriswiner), and re-writen for the simple usage.
@@ -7,7 +8,7 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 
 ### Simple Measurement
 
-``` C++
+```C++
 #include "MPU9250.h"
 
 MPU9250 mpu; // You can also use MPU9255 as is
@@ -36,7 +37,7 @@ void loop() {
 - device should be stay still during accel/gyro calibration
 - round device around during mag calibration
 
-``` C++
+```C++
 #include "MPU9250.h"
 
 MPU9250 mpu; // You can also use MPU9255 as is
@@ -62,23 +63,21 @@ void loop() { }
 
 The coordinate of quaternion and roll/pitch/yaw angles are basedd on airplane coordinate (Right-Handed, X-forward, Z-down). On the other hand, the coordinate of euler angle is based on the axes of acceleration and gyro sensors (Right-Handed, X-forward, Z-up).Please use `getEulerX/Y/Z()` for euler angles and `getRoll/Pitch/Yaw()` for airplane coordinate angles.
 
-
 ## Other Settings
 
 ### I2C Address
 
 You must set your own address based on A0, A1, A2 setting as:
 
-``` C++
+```C++
 mpu.setup(0x70);
 ```
-
 
 ### Customize MPU9250 Configuration
 
 You can set your own setting using `MPU9250Setting` struct as:
 
-``` C++
+```C++
 MPU9250Setting setting;
 setting.accel_fs_sel = ACCEL_FS_SEL::A16G;
 setting.gyro_fs_sel = GYRO_FS_SEL::G2000DPS;
@@ -93,7 +92,6 @@ mpu.setup(0x68, setting);
 ```
 
 See `custom_setting.ino` example for detail.
-
 
 #### List of Settings
 
@@ -160,7 +158,6 @@ You can find magnetic declination in your city [here](http://www.magnetic-declin
 
 For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination).
 
-
 ### Quaternion Filter
 
 You can choose quaternion filter using `void selectFilter(QuatFilterSel sel)`. Available quaternion filters are listed below.
@@ -179,12 +176,11 @@ You can also change the calculate iterations for the filter as follows. The defa
 mpu.setFilterIterations(10);
 ```
 
-
 ### Other I2C library
 
 You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
 
-``` C++
+```C++
 MPU9250_<SoftWire> mpu;
 SoftWire sw(SDA, SCL);
 
@@ -194,7 +190,6 @@ MPU9250Setting setting;
 // in setup()
 mpu.setup(0x70, setting, sw);
 ```
-
 
 ## About I2C Errors
 
@@ -208,10 +203,9 @@ Sometimes this library shows the I2C error number if your connection is not corr
 
 If you have such errors, please check your hardware connection and I2C address setting first. Please refer [Wire.endTransmission() reference](https://www.arduino.cc/en/Reference/WireEndTransmission) for these errors, and [section 2.3 of this explanation](https://www.ti.com/lit/an/slva704/slva704.pdf) for ACK and NACK.
 
-
 ## APIs
 
-``` C++
+```C++
 bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
 void verbose(const bool b);
 void ahrs(const bool b);
@@ -224,6 +218,9 @@ bool isConnectedAK8963();
 bool isSleeping();
 bool available();
 bool update();
+void update_accel_gyro();
+void update_mag();
+void update_rpy(float qw, float qx, float qy, float qz);
 
 float getRoll() const;
 float getPitch() const;
