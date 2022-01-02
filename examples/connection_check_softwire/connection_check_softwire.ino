@@ -81,6 +81,14 @@ void setup() {
             Serial.println(ca, HEX);
             Serial.println("Please use correct device");
         }
+        static constexpr uint8_t AK8963_ADDRESS {0x0C};  //  Address of magnetometer
+        static constexpr uint8_t AK8963_WHOAMI_DEFAULT_VALUE {0x48};
+        byte cb = readByte(AK8963_ADDRESS, AK8963_WHO_AM_I);
+        if (cb == AK8963_WHOAMI_DEFAULT_VALUE) {
+            Serial.print("AK8963 (Magnetometer) is ready to use");
+        } else {
+            Serial.print("AK8963 (Magnetometer) was not found");
+        }
     }
 }
 
