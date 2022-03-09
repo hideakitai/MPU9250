@@ -4,6 +4,8 @@ Arduino library for [MPU9250](https://www.invensense.com/products/motion-trackin
 
 This library is based on the [great work](https://github.com/kriswiner/MPU9250) by [kriswiner](https://github.com/kriswiner), and re-writen for the simple usage.
 
+**MPU-9250 is DISCONTINUED. This library is archived. No further support will be provided.**
+
 ## Usage
 
 ### Simple Measurement
