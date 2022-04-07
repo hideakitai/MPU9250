@@ -4,7 +4,28 @@ Arduino library for [MPU9250](https://www.invensense.com/products/motion-trackin
 
 This library is based on the [great work](https://github.com/kriswiner/MPU9250) by [kriswiner](https://github.com/kriswiner), and re-writen for the simple usage.
 
-**MPU-9250 is DISCONTINUED. This library is archived. No further support will be provided.**
+## WARNING
+
+**MPU-9250 has been DISCONTINUED. I won't provide active support. This library supports only genuine MPU-9250, and I can't help other copy products of it**
+
+If you have a problem, first read the FAQ. After that, please search for similar issues. Please open the issue and fill out the issue template if you can't find the solution.
+
+## FAQ
+
+> There are interference between some axes
+
+There are some possibilities.
+
+- Your device may not be a genuine MPU-9250
+- Calibration is not enough
+- Gimbal lock
+
+Please refer [#62](https://github.com/hideakitai/MPU9250/issues/62), [#69](https://github.com/hideakitai/MPU9250/issues/69), etc.
+
+> Magnetometer is always zero
+
+Your device may not be a genuine MPU-9250. Please refer [#52](https://github.com/hideakitai/MPU9250/issues/52) [#72](https://github.com/hideakitai/MPU9250/issues/72)
+
 
 ## Usage
 
